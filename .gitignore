@@ -11,6 +11,8 @@ Thumbs.db
 .idea/
 .vscode/
 *.iml
+.metals/
+.bloop/
 
 # ===== Java / Gradle (backend) =====
 backend/.gradle/
