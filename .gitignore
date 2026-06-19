@@ -1,0 +1,46 @@
+# ===== Secrets / env =====
+.env
+.env.*
+!.env.example
+
+# ===== OS / Editor =====
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+*.iml
+
+# ===== Java / Gradle (backend) =====
+backend/.gradle/
+backend/build/
+backend/out/
+backend/bin/
+**/*.class
+!gradle/wrapper/gradle-wrapper.jar
+backend/.settings/
+backend/.classpath
+backend/.project
+
+# ===== Node / Vue / Vite (frontend/admin) =====
+node_modules/
+frontend/admin/dist/
+frontend/admin/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# ===== WeChat Mini Program =====
+# developer-private config (per-machine, do not share)
+frontend/project.private.config.json
+frontend/miniprogram/miniprogram_npm/
+frontend/miniprogram_npm/
+
+# ===== Build / scratch =====
+_*.json
+_*.log
+_docx_extract/
+*.local
