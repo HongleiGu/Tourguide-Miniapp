@@ -17,6 +17,9 @@ The API service for the tour-guide platform.
 
 Health: `GET /actuator/health` · Sample: `GET /api/ping`
 
+API docs (dev only): Swagger UI at `/swagger-ui.html`, spec at `/v3/api-docs`. The spec drives
+the frontends' shared TS types — regenerate with `tools/gen-api-types.sh` (see `frontend/shared/`).
+
 ## Configuration & profiles (MIN-11)
 
 Config lives in `src/main/resources/`:
