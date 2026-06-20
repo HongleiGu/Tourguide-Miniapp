@@ -21,7 +21,6 @@ public class SecurityConfig {
             "/api/auth/admin/login",
             "/api/auth/refresh",
             "/api/auth/wx-login",
-            "/api/auth/wx-phone",
             "/api/ping",
             "/actuator/health",
             "/v3/api-docs/**",
