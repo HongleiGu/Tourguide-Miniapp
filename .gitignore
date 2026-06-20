@@ -49,3 +49,7 @@ _docx_extract/
 
 # Office lock/temp files
 ~$*
+
+# WeChat mini program — generated JS output + private devtools config
+frontend/miniprogram/**/*.js
+project.private.config.json
