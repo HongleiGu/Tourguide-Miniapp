@@ -1,0 +1,39 @@
+# Base config shared by all profiles. Secrets are sourced from environment
+# variables (see .env.example); never hard-code real secrets here.
+spring:
+  application:
+    name: tourguide-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# Application-specific settings bound to AppProperties (prefix: app).
+app:
+  jwt:
+    secret: ${JWT_SECRET:}
+    access-token-ttl: ${JWT_ACCESS_TTL:PT2H}
+    refresh-token-ttl: ${JWT_REFRESH_TTL:P7D}
+  wechat:
+    miniapp:
+      app-id: ${WX_APPID:}
+      app-secret: ${WX_APP_SECRET:}
+    pay:
+      mch-id: ${WXPAY_MCHID:}
+      api-v3-key: ${WXPAY_APIV3_KEY:}
+      cert-serial-no: ${WXPAY_CERT_SERIAL:}
+      notify-url: ${WXPAY_NOTIFY_URL:}
+
+# NOTE: MySQL (spring.datasource) and Redis (spring.data.redis) config is added
+# in MIN-12 / MIN-13 when their starters land on the classpath. The DB_* / REDIS_*
+# env vars are already reserved in .env.example.
