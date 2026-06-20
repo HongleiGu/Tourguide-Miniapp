@@ -1,5 +1,7 @@
 # Tour-Guide Mini App (景区定制讲解服务预约管理小程序)
 
+[![CI](https://github.com/HongleiGu/Tourguide-Miniapp/actions/workflows/ci.yml/badge.svg)](https://github.com/HongleiGu/Tourguide-Miniapp/actions/workflows/ci.yml)
+
 A scenic-area guide-booking platform: tourists book guided tours (private / group-buy / time-slot),
 guides accept and verify orders, and scenic-area admins manage staff, sessions, pricing, dispatch,
 and reporting.
