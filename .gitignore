@@ -35,11 +35,15 @@ yarn-error.log*
 pnpm-debug.log*
 .eslintcache
 
-# ===== WeChat Mini Program =====
+# ===== WeChat Mini Program (tourist-miniapp / guide-miniapp) =====
 # developer-private config (per-machine, do not share)
-frontend/project.private.config.json
-frontend/miniprogram/miniprogram_npm/
-frontend/miniprogram_npm/
+project.private.config.json
+# WeChat npm build output
+frontend/*/miniprogram/miniprogram_npm/
+# generated JS (compiled from .ts by DevTools)
+frontend/*/miniprogram/**/*.js
+# shared runtime utils synced in by tools/sync-miniapp-shared.mjs
+frontend/*/miniprogram/shared/
 
 # ===== Build / scratch =====
 _*.json
@@ -49,7 +53,3 @@ _docx_extract/
 
 # Office lock/temp files
 ~$*
-
-# WeChat mini program — generated JS output + private devtools config
-frontend/miniprogram/**/*.js
-project.private.config.json

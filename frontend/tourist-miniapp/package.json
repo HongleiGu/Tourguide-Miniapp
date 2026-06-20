@@ -1,8 +1,9 @@
 {
-  "name": "miniprogram-ts-quickstart",
+  "name": "tourist-miniapp",
   "version": "1.0.0",
-  "description": "",
+  "description": "景区讲解服务 — 游客端 WeChat mini program",
   "scripts": {
+    "sync": "node ../../tools/sync-miniapp-shared.mjs"
   },
   "keywords": [],
   "author": "",

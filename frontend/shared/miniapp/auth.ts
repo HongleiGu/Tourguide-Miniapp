@@ -1,4 +1,4 @@
-import { REFRESH_KEY, TOKEN_KEY } from '../config'
+import { REFRESH_KEY, TOKEN_KEY } from './config'
 import { request } from './request'
 
 interface AuthTokens {

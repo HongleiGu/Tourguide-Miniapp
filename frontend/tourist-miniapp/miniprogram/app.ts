@@ -1,5 +1,5 @@
-// app.ts
-import { fetchMe, login } from './utils/auth'
+// app.ts — 游客 (tourist) mini program
+import { fetchMe, login } from './shared/auth'
 
 App<IAppOption>({
   globalData: {
@@ -7,9 +7,7 @@ App<IAppOption>({
     roles: [],
   },
   onLaunch() {
-    // Silent WeChat login: wx.login -> backend -> token + roles.
-    // The role-aware shell (游客 vs 讲解员 tab group) is built once those pages land
-    // (MIN-3 / MIN-6); here we just establish identity and remember the roles.
+    // Silent WeChat login: wx.login -> backend -> token + roles. Tourist features land in MIN-3.
     login()
       .then((token) => {
         this.globalData.token = token

@@ -1,0 +1,15 @@
+{
+  "name": "guide-miniapp",
+  "version": "1.0.0",
+  "description": "景区讲解服务 — 讲解员端 WeChat mini program",
+  "scripts": {
+    "sync": "node ../../tools/sync-miniapp-shared.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "dependencies": {},
+  "devDependencies": {
+    "miniprogram-api-typings": "^5.2.1"
+  }
+}

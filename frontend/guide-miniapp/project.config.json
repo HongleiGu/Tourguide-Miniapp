@@ -1,0 +1,22 @@
+{
+  "description": "项目配置文件 — 讲解员端",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "setting": {
+    "useCompilerPlugins": [
+      "typescript"
+    ],
+    "ignoreUploadUnusedFiles": true,
+    "es6": false,
+    "minified": false,
+    "postcss": false
+  },
+  "simulatorType": "wechat",
+  "srcMiniprogramRoot": "miniprogram/",
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  },
+  "libVersion": "trial",
+  "appid": "wx0000000000000000"
+}

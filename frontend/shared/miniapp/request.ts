@@ -1,4 +1,4 @@
-import { API_BASE_URL, TOKEN_KEY } from '../config'
+import { API_BASE_URL, TOKEN_KEY } from './config'
 
 /** Standard backend envelope. */
 interface ApiResponse<T> {
