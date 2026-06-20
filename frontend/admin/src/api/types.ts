@@ -9,3 +9,5 @@ export interface ApiResponse<T> {
 
 // Re-export generated schema types for convenient use across the app.
 export type PingResponse = components['schemas']['PingResponse']
+export type AuthTokens = components['schemas']['AuthTokens']
+export type MeResponse = components['schemas']['MeResponse']

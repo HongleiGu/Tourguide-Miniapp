@@ -1,29 +1,48 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-const TOKEN_KEY = 'tg_admin_token'
-const USER_KEY = 'tg_admin_user'
+const ACCESS_KEY = 'tg_access'
+const REFRESH_KEY = 'tg_refresh'
+const USER_KEY = 'tg_user'
+const ROLES_KEY = 'tg_roles'
 
-/** Auth state. The real login flow (wx/JWT, roles) is wired in MIN-2; this is a dev stub. */
+/** Admin auth state, persisted to localStorage so a refresh keeps the session. */
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string>(localStorage.getItem(TOKEN_KEY) ?? '')
+  const accessToken = ref<string>(localStorage.getItem(ACCESS_KEY) ?? '')
+  const refreshToken = ref<string>(localStorage.getItem(REFRESH_KEY) ?? '')
   const username = ref<string>(localStorage.getItem(USER_KEY) ?? '')
+  const roles = ref<string[]>(JSON.parse(localStorage.getItem(ROLES_KEY) ?? '[]'))
 
-  const isAuthenticated = computed(() => token.value.length > 0)
+  const isAuthenticated = computed(() => accessToken.value.length > 0)
 
-  function login(name: string, newToken: string) {
-    token.value = newToken
+  function setTokens(access: string, refresh: string) {
+    accessToken.value = access
+    refreshToken.value = refresh
+    localStorage.setItem(ACCESS_KEY, access)
+    localStorage.setItem(REFRESH_KEY, refresh)
+  }
+
+  function setProfile(name: string, userRoles: string[]) {
     username.value = name
-    localStorage.setItem(TOKEN_KEY, newToken)
+    roles.value = userRoles
     localStorage.setItem(USER_KEY, name)
+    localStorage.setItem(ROLES_KEY, JSON.stringify(userRoles))
+  }
+
+  function hasRole(role: string): boolean {
+    return roles.value.includes(role)
   }
 
   function logout() {
-    token.value = ''
+    accessToken.value = ''
+    refreshToken.value = ''
     username.value = ''
-    localStorage.removeItem(TOKEN_KEY)
+    roles.value = []
+    localStorage.removeItem(ACCESS_KEY)
+    localStorage.removeItem(REFRESH_KEY)
     localStorage.removeItem(USER_KEY)
+    localStorage.removeItem(ROLES_KEY)
   }
 
-  return { token, username, isAuthenticated, login, logout }
+  return { accessToken, refreshToken, username, roles, isAuthenticated, setTokens, setProfile, hasRole, logout }
 })
