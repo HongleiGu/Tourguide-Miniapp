@@ -12,9 +12,11 @@ import com.tourguide.backend.user.AppUser;
 import com.tourguide.backend.user.AppUserRepository;
 import com.tourguide.backend.user.Role;
 import com.tourguide.backend.user.RoleRepository;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ public class AuthService {
     private final AppUserRepository userRepo;
     private final RoleRepository roleRepo;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     /** Exchange a wx.login code for openid; create the user on first login; issue tokens. */
     @Transactional
@@ -45,7 +48,36 @@ public class AuthService {
         }
         AppUser user = userRepo.findByOpenId(session.getOpenid())
                 .orElseGet(() -> createTourist(session.getOpenid(), session.getUnionid()));
-        return issueFor(user);
+        return issueFor(user, UserType.APP);
+    }
+
+    /** Admin login by username + bcrypt password. */
+    @Transactional(readOnly = true)
+    public AuthTokens adminLogin(String username, String rawPassword) {
+        AppUser user = userRepo.findByUsername(username)
+                .filter(u -> u.getPasswordHash() != null)
+                .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误"));
+        if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "用户名或密码错误");
+        }
+        return issueFor(user, UserType.ADMIN);
+    }
+
+    /** Exchange a valid refresh token for a fresh token pair (with the user's current roles). */
+    @Transactional(readOnly = true)
+    public AuthTokens refresh(String refreshToken) {
+        JwtService.TokenInfo info;
+        try {
+            info = jwtService.introspect(refreshToken);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "无效的刷新令牌");
+        }
+        if (!info.refresh()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "无效的刷新令牌");
+        }
+        AppUser user = userRepo.findById(info.userId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED));
+        return issueFor(user, info.type());
     }
 
     /** Decode the phone-number code and bind the verified phone to the current user. */
@@ -72,10 +104,10 @@ public class AuthService {
         return userRepo.save(user);
     }
 
-    private AuthTokens issueFor(AppUser user) {
+    private AuthTokens issueFor(AppUser user, UserType type) {
         List<String> roles = user.getRoles().stream().map(Role::getCode).toList();
-        String access = jwtService.issueAccessToken(user.getId(), UserType.APP, roles);
-        String refresh = jwtService.issueRefreshToken(user.getId(), UserType.APP);
+        String access = jwtService.issueAccessToken(user.getId(), type, roles);
+        String refresh = jwtService.issueRefreshToken(user.getId(), type);
         return new AuthTokens(access, refresh);
     }
 }

@@ -58,6 +58,10 @@ app:
     secret: ${JWT_SECRET:}
     access-token-ttl: ${JWT_ACCESS_TTL:PT2H}
     refresh-token-ttl: ${JWT_REFRESH_TTL:P7D}
+  admin:
+    # Initial super-admin created on startup if absent. Set both in prod; left empty -> skipped.
+    username: ${ADMIN_USERNAME:}
+    password: ${ADMIN_PASSWORD:}
   wechat:
     miniapp:
       app-id: ${WX_APPID:}

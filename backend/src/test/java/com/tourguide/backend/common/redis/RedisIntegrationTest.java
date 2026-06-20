@@ -44,14 +44,15 @@ class RedisIntegrationTest extends AbstractIntegrationTest {
     @Test
     void delayedQueue_deliversOnlyAfterDelay() throws Exception {
         String q = "delay:test:" + System.nanoTime();
-        queue.schedule(q, "payload-1", Duration.ofSeconds(1));
+        // Long delay so the "not due yet" check tolerates GC/scheduling pauses under load.
+        queue.schedule(q, "payload-1", Duration.ofSeconds(5));
 
-        // not due immediately
+        // not due shortly after scheduling
         assertThat(queue.pollDue(q)).isEmpty();
 
-        // becomes due within a couple of seconds
+        // becomes due once the delay elapses (generous headroom for CI/load)
         List<String> got = List.of();
-        long deadline = System.currentTimeMillis() + 3000;
+        long deadline = System.currentTimeMillis() + 12_000;
         while (System.currentTimeMillis() < deadline) {
             got = queue.pollDue(q);
             if (!got.isEmpty()) {

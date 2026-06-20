@@ -69,4 +69,20 @@ public class JwtService {
     public boolean isRefreshToken(Claims claims) {
         return REFRESH.equals(claims.get(CLAIM_TOKEN_USE, String.class));
     }
+
+    /** Verify + decode a token into its typed contents. Throws if signature/expiry are invalid. */
+    public TokenInfo introspect(String token) {
+        Claims c = parse(token);
+        @SuppressWarnings("unchecked")
+        List<String> roles = c.get(CLAIM_ROLES, List.class);
+        return new TokenInfo(
+                Long.parseLong(c.getSubject()),
+                UserType.valueOf(c.get(CLAIM_TYPE, String.class)),
+                roles == null ? List.of() : roles,
+                isRefreshToken(c));
+    }
+
+    /** Decoded token contents. */
+    public record TokenInfo(long userId, UserType type, List<String> roles, boolean refresh) {
+    }
 }
