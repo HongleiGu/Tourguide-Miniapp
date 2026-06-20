@@ -1,18 +1,25 @@
 // app.ts
-App<IAppOption>({
-  globalData: {},
-  onLaunch() {
-    // 展示本地存储能力
-    const logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
+import { fetchMe, login } from './utils/auth'
 
-    // 登录
-    wx.login({
-      success: res => {
-        console.log(res.code)
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      },
-    })
+App<IAppOption>({
+  globalData: {
+    token: '',
+    roles: [],
+  },
+  onLaunch() {
+    // Silent WeChat login: wx.login -> backend -> token + roles.
+    // The role-aware shell (游客 vs 讲解员 tab group) is built once those pages land
+    // (MIN-3 / MIN-6); here we just establish identity and remember the roles.
+    login()
+      .then((token) => {
+        this.globalData.token = token
+        return fetchMe()
+      })
+      .then((me) => {
+        this.globalData.roles = me.roles
+      })
+      .catch((err: Error) => {
+        console.warn('wx login skipped/failed (expected without real WX credentials):', err.message)
+      })
   },
 })

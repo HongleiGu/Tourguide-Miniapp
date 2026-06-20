@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import { adminLogin, fetchMe } from '@/api/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,13 +22,18 @@ async function onSubmit() {
   if (!formRef.value) return
   await formRef.value.validate()
   loading.value = true
-  // Dev stub — replaced by a real auth call in MIN-2.
-  window.setTimeout(() => {
-    auth.login(form.username, 'dev-stub-token')
-    loading.value = false
+  try {
+    const tokens = await adminLogin(form.username, form.password)
+    auth.setTokens(tokens.accessToken ?? '', tokens.refreshToken ?? '')
+    const me = await fetchMe()
+    auth.setProfile(form.username, me.roles ?? [])
     ElMessage.success('登录成功')
     router.push((route.query.redirect as string) || '/')
-  }, 300)
+  } catch {
+    // Error toast is shown by the axios interceptor.
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -59,7 +65,7 @@ async function onSubmit() {
           登录
         </el-button>
       </el-form>
-      <p class="hint">开发占位登录（任意用户名/密码）。真实鉴权见 MIN-2。</p>
+      <p class="hint">开发环境默认账号：admin / admin123</p>
     </el-card>
   </div>
 </template>
