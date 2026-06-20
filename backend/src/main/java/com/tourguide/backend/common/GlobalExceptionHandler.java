@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 /**
  * Translates exceptions into the standard {@link ApiResponse} envelope.
  *
- * <p>HTTP status policy: expected business outcomes return 200 with an error code in the body;
- * validation failures return 400; anything unexpected returns 500.
+ * <p>HTTP status policy: business errors use the HTTP status mapped on their {@link ErrorCode}
+ * (e.g. UNAUTHORIZED -> 401); validation failures return 400; anything unexpected returns 500.
+ * The {@link ApiResponse} envelope (with the business code) is always in the body.
  */
 @Slf4j
 @RestControllerAdvice
@@ -22,8 +23,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException ex) {
-        log.warn("business error [{}]: {}", ex.getErrorCode().getCode(), ex.getMessage());
-        return ResponseEntity.ok(ApiResponse.error(ex.getErrorCode(), ex.getMessage()));
+        ErrorCode error = ex.getErrorCode();
+        log.warn("business error [{}]: {}", error.getCode(), ex.getMessage());
+        return ResponseEntity.status(error.getHttpStatus()).body(ApiResponse.error(error, ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

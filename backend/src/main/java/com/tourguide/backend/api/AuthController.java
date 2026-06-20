@@ -1,7 +1,9 @@
 package com.tourguide.backend.api;
 
+import com.tourguide.backend.api.dto.AdminLoginRequest;
 import com.tourguide.backend.api.dto.AuthTokens;
 import com.tourguide.backend.api.dto.MeResponse;
+import com.tourguide.backend.api.dto.RefreshRequest;
 import com.tourguide.backend.api.dto.WxLoginRequest;
 import com.tourguide.backend.api.dto.WxPhoneRequest;
 import com.tourguide.backend.auth.AuthService;
@@ -27,6 +29,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
+    /** Admin login by username + password. */
+    @PostMapping("/admin/login")
+    public ApiResponse<AuthTokens> adminLogin(@Valid @RequestBody AdminLoginRequest req) {
+        return ApiResponse.ok(authService.adminLogin(req.username(), req.password()));
+    }
+
+    /** Exchange a refresh token for a fresh token pair. */
+    @PostMapping("/refresh")
+    public ApiResponse<AuthTokens> refresh(@Valid @RequestBody RefreshRequest req) {
+        return ApiResponse.ok(authService.refresh(req.refreshToken()));
+    }
 
     /** WeChat silent login: exchange a wx.login code for tokens. */
     @PostMapping("/wx-login")

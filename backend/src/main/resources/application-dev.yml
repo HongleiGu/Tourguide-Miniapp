@@ -8,6 +8,10 @@ app:
   jwt:
     # Falls back to an insecure dev key when JWT_SECRET is not set. Never used in prod.
     secret: ${JWT_SECRET:dev-only-insecure-jwt-secret-please-override-min-32-chars}
+  admin:
+    # Dev super-admin (override via ADMIN_USERNAME / ADMIN_PASSWORD).
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123}
 
 # Swagger UI + /v3/api-docs available in dev only (http://localhost:8080/swagger-ui.html).
 springdoc:

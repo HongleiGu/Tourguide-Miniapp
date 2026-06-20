@@ -16,12 +16,16 @@ import java.time.Duration;
  */
 @Validated
 @ConfigurationProperties(prefix = "app")
-public record AppProperties(@Valid Jwt jwt, @Valid Wechat wechat) {
+public record AppProperties(@Valid Jwt jwt, @Valid Wechat wechat, Admin admin) {
 
     public record Jwt(
             @NotBlank(message = "app.jwt.secret (env JWT_SECRET) must be set") String secret,
             Duration accessTokenTtl,
             Duration refreshTokenTtl) {
+    }
+
+    /** Initial super-admin, created on startup if absent (see AdminBootstrap). Optional. */
+    public record Admin(String username, String password) {
     }
 
     public record Wechat(Miniapp miniapp, Pay pay) {

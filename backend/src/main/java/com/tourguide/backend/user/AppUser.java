@@ -36,6 +36,12 @@ public class AppUser {
     @Column(name = "union_id")
     private String unionId;
 
+    @Column(unique = true)
+    private String username;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     private String phone;
 
     private String nickname;
