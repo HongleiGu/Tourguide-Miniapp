@@ -14,7 +14,7 @@ Three roles across two surfaces:
 
 ## Tech stack
 
-- **Backend:** Spring Boot 3 (Java 21) + MySQL 8 + Redis, packaged with Docker Compose.
+- **Backend:** Spring Boot 3.5 (Java 21, Maven) + MySQL 8 + Redis, packaged with Docker Compose.
 - **Admin web:** Vue 3 + TypeScript + Element Plus (Vite).
 - **Mini Program:** WeChat native + TypeScript (one app, tourist/guide role switch).
 - **API contract:** OpenAPI → generated TypeScript types shared by both frontends.
@@ -23,7 +23,7 @@ Three roles across two surfaces:
 
 ```
 .
-├── backend/              # Spring Boot 3 service (Java 21, Gradle)        — see MIN-10
+├── backend/              # Spring Boot 3.5 service (Java 21, Maven)        — see MIN-10
 ├── frontend/
 │   ├── miniprogram/      # WeChat Mini Program (TypeScript) — tourist + guide
 │   └── admin/            # Vue 3 + TS + Element Plus admin console        — see MIN-15
