@@ -28,7 +28,9 @@ Three roles across two surfaces:
 ├── backend/              # Spring Boot 3.5 service (Java 21, Maven)        — see MIN-10
 ├── frontend/
 │   ├── miniprogram/      # WeChat Mini Program (TypeScript) — tourist + guide
-│   └── admin/            # Vue 3 + TS + Element Plus admin console        — see MIN-15
+│   ├── admin/            # Vue 3 + TS + Element Plus admin console        — see MIN-15
+│   └── shared/           # Generated TS API types (from OpenAPI)          — see MIN-14
+├── docker-compose.yml    # Full local stack: mysql + redis + app + nginx  — see MIN-16
 ├── tools/
 │   └── jira.py           # Zero-dependency Jira CLI (project board: MIN)
 ├── .env.example          # Template for local secrets — copy to .env
@@ -49,6 +51,22 @@ Three roles across two surfaces:
 2. **Backend:** see `backend/` (MIN-10). Local stack via `docker compose up` (MIN-16).
 3. **Admin web:** see `frontend/admin/` (MIN-15).
 4. **Mini Program:** open `frontend/` in WeChat DevTools (root contains `project.config.json`).
+
+### Full stack via Docker Compose (MIN-16)
+
+```bash
+docker compose up -d --build          # mysql + redis + app + nginx
+```
+
+Then open **http://localhost** — nginx serves the admin SPA and reverse-proxies `/api/*`
+to the backend. No domain or TLS needed locally (`server_name _`). Individual services:
+
+```bash
+docker compose up -d mysql redis      # just the datastores (for host-run backend/admin dev)
+```
+
+A domain + HTTPS + ICP 备案 are required later for WeChat (Pay callbacks, mini-program
+request domains) — see `frontend/admin/nginx.conf` for where to add `server_name` + TLS.
 
 ## Project management
 
