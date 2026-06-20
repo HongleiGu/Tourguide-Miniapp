@@ -1,0 +1,27 @@
+# Local dev infrastructure. Extended into the full stack (app + redis + nginx) in MIN-16.
+# Values come from .env (Docker Compose auto-loads it); sensible dev defaults below.
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: tourguide-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-tourguide}
+      MYSQL_USER: ${DB_USER:-tourguide}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-tourguide}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:
