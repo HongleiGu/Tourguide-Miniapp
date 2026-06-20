@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (build + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      # Runs unit + integration tests; the integration tests use Testcontainers
+      # (MySQL + Redis), and Docker is available on ubuntu runners out of the box.
+      - name: Build & test
+        working-directory: backend
+        run: ./mvnw -B verify
+
+  admin:
+    name: Admin web (typecheck + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/admin/package-lock.json
+      - name: Install
+        working-directory: frontend/admin
+        run: npm ci
+      # `npm run build` = vue-tsc typecheck (incl. the shared @shared/api types) + vite build.
+      - name: Typecheck & build
+        working-directory: frontend/admin
+        run: npm run build
+
+  miniprogram:
+    name: Mini Program (typecheck — informational)
+    runs-on: ubuntu-latest
+    # Non-blocking: the WeChat starter's bundled wx typings have a known tsc strictness
+    # issue (lib.wx.app.d.ts TS2344), and the mini program is compiled by WeChat DevTools,
+    # not raw tsc. Kept here for visibility; tracked for a future typings cleanup.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install typings
+        working-directory: frontend
+        run: npm install
+      - name: Typecheck
+        working-directory: frontend
+        run: npx -p typescript tsc -p tsconfig.json --noEmit
