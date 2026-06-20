@@ -1,4 +1,9 @@
 <view class="page">
+  <view class="topbar">
+    <text class="brand">景区讲解</text>
+    <text class="mine" bindtap="goMine">我的 ›</text>
+  </view>
+
   <view wx:if="{{announcements.length}}" class="banner">
     <view wx:for="{{announcements}}" wx:key="id" class="ann">📢 {{item.title}}：{{item.content}}</view>
   </view>

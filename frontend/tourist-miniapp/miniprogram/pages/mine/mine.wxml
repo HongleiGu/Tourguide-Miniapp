@@ -1,0 +1,21 @@
+<view class="page">
+  <view class="card">
+    <view class="hd">登录状态</view>
+    <view wx:if="{{loggedIn}}">
+      <view class="line"><text class="k">状态</text><text class="ok">已登录</text></view>
+      <view class="line"><text class="k">用户 ID</text><text class="v">{{userId}}</text></view>
+      <view class="line"><text class="k">类型</text><text class="v">{{type}}</text></view>
+      <view class="line"><text class="k">角色</text><text class="v">{{roles}}</text></view>
+      <view class="line"><text class="k">token</text><text class="v small">{{tokenPreview}}</text></view>
+      <view wx:if="{{phoneBound}}" class="line"><text class="k">手机号</text><text class="ok">已绑定</text></view>
+    </view>
+    <view wx:else class="muted">未登录</view>
+  </view>
+
+  <button class="btn" type="primary" loading="{{busy}}" bindtap="doLogin">登录 / 重新登录</button>
+  <button class="btn" bindtap="refresh">刷新 /me</button>
+  <button class="btn" open-type="getPhoneNumber" bindgetphonenumber="onGetPhone">手机号快捷登录（绑定）</button>
+  <button wx:if="{{loggedIn}}" class="btn warn" bindtap="doLogout">退出登录</button>
+
+  <view class="tip">无真实微信凭据时，登录会自动回退到后端 dev-login（仅 dev 环境）。手机号能力需企业小程序。</view>
+</view>

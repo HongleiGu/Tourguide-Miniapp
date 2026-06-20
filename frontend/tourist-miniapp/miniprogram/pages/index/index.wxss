@@ -1,6 +1,21 @@
 .page {
   padding: 24rpx;
 }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.brand {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f3a5f;
+}
+.mine {
+  font-size: 26rpx;
+  color: #2c5282;
+}
 .banner {
   background: #fff7e6;
   border: 1rpx solid #ffe1a8;

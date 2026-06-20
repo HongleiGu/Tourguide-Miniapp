@@ -49,6 +49,10 @@ Page({
     }
   },
 
+  goMine() {
+    wx.navigateTo({ url: '/pages/mine/mine' })
+  },
+
   goBooking(e: WechatMiniprogram.TouchEvent) {
     const { id, title, price, type } = e.currentTarget.dataset
     wx.navigateTo({

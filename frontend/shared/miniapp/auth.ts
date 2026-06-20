@@ -49,6 +49,12 @@ export async function login(): Promise<string> {
   }
 }
 
+/** Clear stored tokens (sign out). */
+export function logout(): void {
+  wx.removeStorageSync(TOKEN_KEY)
+  wx.removeStorageSync(REFRESH_KEY)
+}
+
 /** Bind the WeChat-verified phone using the code from the getPhoneNumber button. */
 export function bindPhone(code: string): Promise<void> {
   return request<void>({ url: '/api/auth/wx-phone', method: 'POST', data: { code } })
