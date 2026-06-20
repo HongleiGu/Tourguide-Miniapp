@@ -5,6 +5,7 @@ import com.tourguide.backend.security.RestAccessDeniedHandler;
 import com.tourguide.backend.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,7 +16,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /** Stateless JWT security: no sessions, no form/basic login; auth via the Bearer JWT filter. */
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    private static final String[] ADMIN_ROLES = {"ADMIN_SUPER", "ADMIN_OPS", "ADMIN_FINANCE"};
 
     private static final String[] PUBLIC = {
             "/api/auth/admin/login",
@@ -40,6 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(reg -> reg
                         .requestMatchers(PUBLIC).permitAll()
+                        .requestMatchers("/api/admin/**").hasAnyRole(ADMIN_ROLES)
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(entryPoint)
