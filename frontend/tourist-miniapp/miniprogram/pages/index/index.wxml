@@ -1,5 +1,30 @@
-<view class="container">
-  <text class="title">游客端</text>
-  <text class="subtitle">脚手架页面 · 功能见 MIN-3（预约下单）</text>
-  <text class="roles">roles: {{roles}}</text>
+<view class="page">
+  <view wx:if="{{announcements.length}}" class="banner">
+    <view wx:for="{{announcements}}" wx:key="id" class="ann">📢 {{item.title}}：{{item.content}}</view>
+  </view>
+
+  <view class="hd">可预约讲解</view>
+  <view wx:if="{{loading}}" class="muted center">加载中…</view>
+  <view wx:elif="{{!sessions.length}}" class="muted center">暂无可预约场次</view>
+
+  <view
+    wx:for="{{sessions}}"
+    wx:key="id"
+    class="card"
+    data-id="{{item.id}}"
+    data-title="{{item.title}}"
+    data-price="{{item.priceFen}}"
+    data-type="{{item.type}}"
+    bindtap="goBooking"
+  >
+    <view class="card-title">{{item.title}}</view>
+    <view class="card-row">
+      <text class="tag">{{item.typeLabel}}</text>
+      <text class="muted">{{item.date}} {{item.startTime}}-{{item.endTime}}</text>
+    </view>
+    <view class="card-row">
+      <text class="price">¥{{item.priceYuan}}</text>
+      <text class="muted">剩余 {{item.remaining}}/{{item.capacity}}</text>
+    </view>
+  </view>
 </view>
