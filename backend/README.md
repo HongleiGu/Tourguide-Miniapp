@@ -33,6 +33,22 @@ SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run        # or set in the enviro
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod    # Maven plugin flag
 ```
 
-Secrets (`JWT_SECRET`, `WX_*`, `WXPAY_*`, later `DB_*` / `REDIS_*`) are injected from the
+Secrets (`JWT_SECRET`, `WX_*`, `WXPAY_*`, `DB_*`, `REDIS_*`) are injected from the
 environment — never commit real values. Copy `.env.example` to `.env` and fill it in.
 Typed binding for the `app.*` tree is in `config/AppProperties`.
+
+## Data infrastructure
+
+- **MySQL 8** (MIN-12) — schema via Flyway (`src/main/resources/db/migration/`), JPA `ddl-auto=validate`.
+- **Redis** (MIN-13) — Lettuce/`RedisTemplate` + Spring cache for hot reads; **Redisson** for the
+  distributed lock. Helpers live in `common/redis/`:
+  - `DistributedLock` — Redisson-backed; makes "check seats then claim" atomic (group-buy, MIN-4).
+  - `DelayedTaskQueue` — ZSet-based delayed queue; powers group-buy timeout auto-void (MIN-4).
+  - `RedisKeys` — the single source of key conventions: `lock:*`, `cache:*`, `delay:*`.
+
+Run both via Docker for local dev:
+
+```bash
+docker compose up -d mysql redis     # from repo root
+```
+
