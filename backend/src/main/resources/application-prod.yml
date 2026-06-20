@@ -1,0 +1,6 @@
+# Prod profile: NO secret defaults. Every required value must come from the
+# environment, so a missing secret fails fast at startup (see AppProperties validation).
+logging:
+  level:
+    root: WARN
+    com.tourguide: INFO

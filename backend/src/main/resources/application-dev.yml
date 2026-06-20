@@ -1,0 +1,10 @@
+# Dev profile: developer-friendly defaults so the app boots WITHOUT real secrets.
+# Override any of these via environment variables / a local .env.
+logging:
+  level:
+    com.tourguide: DEBUG
+
+app:
+  jwt:
+    # Falls back to an insecure dev key when JWT_SECRET is not set. Never used in prod.
+    secret: ${JWT_SECRET:dev-only-insecure-jwt-secret-please-override-min-32-chars}
