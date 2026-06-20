@@ -31,6 +31,15 @@ spring:
       password: ${REDIS_PASSWORD:}
       timeout: 3s
 
+# OpenAPI / Swagger UI. Disabled by default; enabled in the dev profile only (never prod).
+springdoc:
+  api-docs:
+    enabled: false
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui.html
+
 server:
   port: ${SERVER_PORT:8080}
 

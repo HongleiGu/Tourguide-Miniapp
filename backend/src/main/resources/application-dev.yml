@@ -8,3 +8,10 @@ app:
   jwt:
     # Falls back to an insecure dev key when JWT_SECRET is not set. Never used in prod.
     secret: ${JWT_SECRET:dev-only-insecure-jwt-secret-please-override-min-32-chars}
+
+# Swagger UI + /v3/api-docs available in dev only (http://localhost:8080/swagger-ui.html).
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
