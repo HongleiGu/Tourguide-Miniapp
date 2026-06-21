@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { Avatar, Calendar, DataBoard, Money, Tickets, User } from '@element-plus/icons-vue'
+import { Avatar, Calendar, DataBoard, Money, TrendCharts, Tickets, User } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -45,6 +45,10 @@ async function handleLogout() {
         <el-menu-item index="/orders">
           <el-icon><Tickets /></el-icon>
           <span>订单管理</span>
+        </el-menu-item>
+        <el-menu-item index="/stats">
+          <el-icon><TrendCharts /></el-icon>
+          <span>基础统计</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

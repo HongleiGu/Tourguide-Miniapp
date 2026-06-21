@@ -14,4 +14,6 @@ public interface ScenicSessionRepository extends JpaRepository<ScenicSession, Lo
     List<ScenicSession> findBySessionDateOrderByStartTimeAsc(LocalDate sessionDate);
 
     List<ScenicSession> findAllByOrderBySessionDateAscStartTimeAsc();
+
+    List<ScenicSession> findBySessionDateBetween(LocalDate from, LocalDate to);
 }
