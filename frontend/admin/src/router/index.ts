@@ -19,6 +19,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Dashboard.vue'),
         meta: { title: '工作台' },
       },
+      {
+        path: 'guides',
+        name: 'guides',
+        component: () => import('@/views/Guides.vue'),
+        meta: { title: '人员管理' },
+      },
     ],
   },
 ]

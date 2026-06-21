@@ -14,6 +14,7 @@ import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
 import com.tourguide.backend.user.AppUser;
 import com.tourguide.backend.user.AppUserRepository;
+import com.tourguide.backend.user.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class GuideService {
     private final GuideProfileRepository guideRepo;
     private final GuideScheduleRepository scheduleRepo;
     private final AppUserRepository userRepo;
+    private final RoleRepository roleRepo;
     private final BookingOrderRepository orderRepo;
     private final ScenicSessionRepository sessionRepo;
 
@@ -48,6 +50,48 @@ public class GuideService {
                 Boolean.TRUE.equals(p.getAcceptingOrders()), p.getStatus(),
                 p.getRating() != null ? p.getRating().doubleValue() : 0,
                 p.getStarLevel() != null ? p.getStarLevel() : 0);
+    }
+
+    /** Admin (MIN-47): all guides. */
+    @Transactional(readOnly = true)
+    public List<AdminGuideView> listGuides() {
+        return guideRepo.findAll().stream().map(this::adminView).toList();
+    }
+
+    /** Admin (MIN-47): 新增讲解员 (app_user + GUIDE role + guide_profile). */
+    @Transactional
+    public AdminGuideView createGuide(String name, String employmentType) {
+        AppUser u = new AppUser();
+        u.setNickname(name);
+        roleRepo.findByCode("GUIDE").ifPresent(u.getRoles()::add);
+        AppUser savedUser = userRepo.save(u);
+        GuideProfile p = new GuideProfile();
+        p.setUserId(savedUser.getId());
+        if (employmentType != null && !employmentType.isBlank()) {
+            p.setEmploymentType(employmentType);
+        }
+        return adminView(guideRepo.save(p));
+    }
+
+    /** Admin (MIN-47): 启用/禁用 (DISABLED guides are ineligible for dispatch/grab). */
+    @Transactional
+    public AdminGuideView setEnabled(long guideId, boolean enabled) {
+        GuideProfile p = guide(guideId);
+        p.setStatus(enabled ? "ENABLED" : "DISABLED");
+        return adminView(guideRepo.save(p));
+    }
+
+    /** Admin (MIN-47): 自营/外包. */
+    @Transactional
+    public AdminGuideView setEmployment(long guideId, String employmentType) {
+        GuideProfile p = guide(guideId);
+        p.setEmploymentType(employmentType);
+        return adminView(guideRepo.save(p));
+    }
+
+    private GuideProfile guide(long guideId) {
+        return guideRepo.findById(guideId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "讲解员不存在"));
     }
 
     /** Admin (MIN-43): set a guide's 派单权重. */
