@@ -1,11 +1,22 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/workbench/workbench",
+    "pages/orders/orders",
+    "pages/mine/mine"
   ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "景区讲解·讲解员",
     "navigationBarBackgroundColor": "#ffffff"
+  },
+  "tabBar": {
+    "color": "#909399",
+    "selectedColor": "#1f3a5f",
+    "list": [
+      { "pagePath": "pages/workbench/workbench", "text": "工作台" },
+      { "pagePath": "pages/orders/orders", "text": "订单" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
   },
   "style": "v2",
   "componentFramework": "glass-easel",

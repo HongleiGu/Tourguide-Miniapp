@@ -1,0 +1,13 @@
+.page {
+  padding: 40rpx 24rpx;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 16rpx;
+}
+.muted {
+  font-size: 26rpx;
+  color: #909399;
+}

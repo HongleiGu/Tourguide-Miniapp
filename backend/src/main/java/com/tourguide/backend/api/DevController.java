@@ -2,10 +2,13 @@ package com.tourguide.backend.api;
 
 import com.tourguide.backend.api.dto.AuthTokens;
 import com.tourguide.backend.api.dto.OrderView;
+import com.tourguide.backend.booking.DevDataBootstrap;
 import com.tourguide.backend.booking.TouristService;
 import com.tourguide.backend.common.ApiResponse;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
+import com.tourguide.backend.guide.GuideProfile;
+import com.tourguide.backend.guide.GuideProfileRepository;
 import com.tourguide.backend.security.AuthPrincipal;
 import com.tourguide.backend.security.JwtService;
 import com.tourguide.backend.security.UserType;
@@ -38,6 +41,7 @@ public class DevController {
 
     private final AppUserRepository userRepo;
     private final RoleRepository roleRepo;
+    private final GuideProfileRepository guideRepo;
     private final JwtService jwtService;
     private final TouristService touristService;
 
@@ -45,10 +49,27 @@ public class DevController {
     @Transactional
     public ApiResponse<AuthTokens> devLogin() {
         AppUser user = userRepo.findByOpenId(DEV_OPENID).orElseGet(this::createDevTourist);
+        return ApiResponse.ok(tokensFor(user));
+    }
+
+    /** Dev guide login (GUIDE token) so the guide app is testable without real WeChat. */
+    @PostMapping("/api/auth/dev-login-guide")
+    @Transactional
+    public ApiResponse<AuthTokens> devLoginGuide() {
+        AppUser user = userRepo.findByOpenId(DevDataBootstrap.DEV_GUIDE_OPENID).orElseGet(this::createDevGuide);
+        guideRepo.findByUserId(user.getId()).orElseGet(() -> {
+            GuideProfile p = new GuideProfile();
+            p.setUserId(user.getId());
+            return guideRepo.save(p);
+        });
+        return ApiResponse.ok(tokensFor(user));
+    }
+
+    private AuthTokens tokensFor(AppUser user) {
         List<String> roles = user.getRoles().stream().map(Role::getCode).toList();
-        return ApiResponse.ok(new AuthTokens(
+        return new AuthTokens(
                 jwtService.issueAccessToken(user.getId(), UserType.APP, roles),
-                jwtService.issueRefreshToken(user.getId(), UserType.APP)));
+                jwtService.issueRefreshToken(user.getId(), UserType.APP));
     }
 
     @PostMapping("/api/tourist/orders/{id}/mock-pay")
@@ -65,6 +86,14 @@ public class DevController {
         user.setOpenId(DEV_OPENID);
         user.setNickname("Dev Tourist");
         roleRepo.findByCode("TOURIST").ifPresent(user.getRoles()::add);
+        return userRepo.save(user);
+    }
+
+    private AppUser createDevGuide() {
+        AppUser user = new AppUser();
+        user.setOpenId(DevDataBootstrap.DEV_GUIDE_OPENID);
+        user.setNickname("Dev Guide");
+        roleRepo.findByCode("GUIDE").ifPresent(user.getRoles()::add);
         return userRepo.save(user);
     }
 }

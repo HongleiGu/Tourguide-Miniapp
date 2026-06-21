@@ -1,5 +1,0 @@
-<view class="container">
-  <text class="title">讲解员端</text>
-  <text class="subtitle">脚手架页面 · 功能见 MIN-6</text>
-  <text class="roles">roles: {{roles}}</text>
-</view>

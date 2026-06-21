@@ -33,7 +33,7 @@ function storeTokens(tokens: AuthTokens): string {
  * Dev fallback: if wx-login fails (e.g. no real WX credentials), tries the backend's
  * dev-login (only available under the dev profile) so the app stays testable in DevTools.
  */
-export async function login(): Promise<string> {
+export async function login(opts?: { devLoginUrl?: string }): Promise<string> {
   try {
     const code = await wxLoginCode()
     const tokens = await request<AuthTokens>({
@@ -44,7 +44,12 @@ export async function login(): Promise<string> {
     })
     return storeTokens(tokens)
   } catch {
-    const tokens = await request<AuthTokens>({ url: '/api/auth/dev-login', method: 'POST', auth: false })
+    // Dev fallback (no real WX credentials). The guide app passes /api/auth/dev-login-guide.
+    const tokens = await request<AuthTokens>({
+      url: opts?.devLoginUrl ?? '/api/auth/dev-login',
+      method: 'POST',
+      auth: false,
+    })
     return storeTokens(tokens)
   }
 }
