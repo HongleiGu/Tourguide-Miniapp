@@ -6,8 +6,10 @@ import com.tourguide.backend.api.dto.OrderView;
 import com.tourguide.backend.api.dto.ReviewRequest;
 import com.tourguide.backend.api.dto.ReviewView;
 import com.tourguide.backend.api.dto.SessionView;
+import com.tourguide.backend.api.dto.VerifyQr;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
+import com.tourguide.backend.common.QrCodes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,6 +105,16 @@ public class TouristService {
     @Transactional(readOnly = true)
     public OrderView getOrder(long userId, long orderId) {
         return toOrderView(ownedOrder(userId, orderId), null);
+    }
+
+    /** The order's 核销码 as a scannable QR (PNG data-URL) for the guide to scan. */
+    @Transactional(readOnly = true)
+    public VerifyQr verifyQr(long userId, long orderId) {
+        BookingOrder order = ownedOrder(userId, orderId);
+        if (order.getVerifyCode() == null || order.getVerifyCode().isBlank()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单未支付，暂无核销码");
+        }
+        return new VerifyQr(order.getVerifyCode(), QrCodes.dataUrl(order.getVerifyCode(), 240));
     }
 
     /** Tourist self-cancels an order: releases any 拼团 seat and refunds per the cancel policy. */

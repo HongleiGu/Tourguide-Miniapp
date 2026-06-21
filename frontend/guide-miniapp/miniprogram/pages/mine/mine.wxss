@@ -1,0 +1,43 @@
+.page {
+  padding: 24rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+.name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 16rpx;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.k {
+  color: #909399;
+  font-size: 26rpx;
+}
+.v {
+  color: #1f2329;
+  font-size: 26rpx;
+}
+.muted {
+  color: #909399;
+  font-size: 26rpx;
+}
+.center {
+  text-align: center;
+  padding: 60rpx 0;
+}
+.btn {
+  margin-top: 20rpx;
+}

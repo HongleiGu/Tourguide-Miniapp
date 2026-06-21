@@ -1,0 +1,89 @@
+.page {
+  padding: 24rpx;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.date {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.badge {
+  font-size: 24rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+}
+.badge.on {
+  color: #fff;
+  background: #389e0d;
+}
+.badge.off {
+  color: #fff;
+  background: #909399;
+}
+.stats {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+.stat {
+  flex: 1;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 0;
+  text-align: center;
+}
+.num {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1f3a5f;
+}
+.label {
+  font-size: 24rpx;
+  color: #909399;
+  margin-top: 8rpx;
+}
+.scan-btn {
+  margin-bottom: 20rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+.card-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 12rpx;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.k {
+  color: #909399;
+  font-size: 26rpx;
+}
+.v {
+  color: #1f2329;
+  font-size: 26rpx;
+}
+.muted {
+  color: #909399;
+  font-size: 26rpx;
+}
+.center {
+  text-align: center;
+  padding: 60rpx 0;
+}

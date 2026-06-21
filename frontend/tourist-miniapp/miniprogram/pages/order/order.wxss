@@ -48,6 +48,11 @@
   font-size: 26rpx;
   color: #909399;
 }
+.qr {
+  width: 320rpx;
+  margin: 16rpx auto 0;
+  display: block;
+}
 .verify-code {
   font-size: 52rpx;
   font-weight: 700;

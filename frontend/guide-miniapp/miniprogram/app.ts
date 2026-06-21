@@ -7,8 +7,8 @@ App<IAppOption>({
     roles: [],
   },
   onLaunch() {
-    // Silent WeChat login: wx.login -> backend -> token + roles. Guide features land in MIN-6.
-    login()
+    // Silent WeChat login: wx.login -> backend -> token + roles. Dev fallback issues a GUIDE token.
+    login({ devLoginUrl: '/api/auth/dev-login-guide' })
       .then((token) => {
         this.globalData.token = token
         return fetchMe()

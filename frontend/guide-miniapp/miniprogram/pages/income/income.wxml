@@ -1,0 +1,23 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="muted center">加载中…</view>
+
+  <block wx:else>
+    <view class="summary">
+      <view class="total">¥{{totalYuan}}</view>
+      <view class="sub">共 {{orderCount}} 单 · 线上不做分佣</view>
+    </view>
+
+    <view wx:if="{{!items.length}}" class="muted center">暂无收入</view>
+
+    <view wx:for="{{items}}" wx:key="orderId" class="card">
+      <view class="row">
+        <text class="title">{{item.sessionTitle}}</text>
+        <text class="amount">¥{{item.amountYuan}}</text>
+      </view>
+      <view class="row">
+        <text class="muted">{{item.date}} · {{item.statusLabel}}</text>
+        <text class="no">{{item.orderNo}}</text>
+      </view>
+    </view>
+  </block>
+</view>

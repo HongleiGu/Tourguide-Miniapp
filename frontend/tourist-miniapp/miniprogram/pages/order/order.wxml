@@ -9,6 +9,7 @@
 
   <view wx:if="{{order.status === 'PAID' && order.verifyCode}}" class="card verify">
     <view class="verify-label">核销码</view>
+    <image wx:if="{{qrDataUrl}}" class="qr" src="{{qrDataUrl}}" mode="widthFix" />
     <view class="verify-code">{{order.verifyCode}}</view>
     <view class="muted">出示给讲解员扫码核销</view>
   </view>

@@ -86,5 +86,13 @@ class TouristBookingTest extends AbstractIntegrationTest {
         mvc.perform(get("/api/tourist/orders").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").exists());
+
+        // 核销码 QR is available for the paid order
+        mvc.perform(get("/api/tourist/orders/" + orderId + "/verify-qr")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.code").isNotEmpty())
+                .andExpect(jsonPath("$.data.dataUrl")
+                        .value(org.hamcrest.Matchers.startsWith("data:image/png;base64,")));
     }
 }
