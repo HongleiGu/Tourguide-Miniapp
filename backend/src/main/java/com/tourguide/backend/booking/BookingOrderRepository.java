@@ -5,11 +5,16 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BookingOrderRepository extends JpaRepository<BookingOrder, Long> {
 
     Optional<BookingOrder> findByOrderNo(String orderNo);
+
+    Optional<BookingOrder> findByVerifyCode(String verifyCode);
+
+    List<BookingOrder> findByUserIdOrderByIdDesc(Long userId);
 
     /** Cancel a session's active orders (used when a group-buy is voided). Returns rows updated. */
     @Modifying(clearAutomatically = true)

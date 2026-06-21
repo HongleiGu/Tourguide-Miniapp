@@ -3,6 +3,7 @@
     "pages/index/index",
     "pages/booking/booking",
     "pages/order/order",
+    "pages/orders/orders",
     "pages/mine/mine"
   ],
   "window": {

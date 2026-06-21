@@ -3,10 +3,14 @@ package com.tourguide.backend.booking;
 import com.tourguide.backend.api.dto.AnnouncementView;
 import com.tourguide.backend.api.dto.CreateOrderRequest;
 import com.tourguide.backend.api.dto.OrderView;
+import com.tourguide.backend.api.dto.ReviewRequest;
+import com.tourguide.backend.api.dto.ReviewView;
 import com.tourguide.backend.api.dto.SessionView;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /** Tourist-facing browse + booking. Real WeChat Pay replaces mock-pay in MIN-27. */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TouristService {
@@ -27,8 +32,16 @@ public class TouristService {
     private final ScenicSessionRepository sessionRepo;
     private final AnnouncementRepository announcementRepo;
     private final BookingOrderRepository orderRepo;
+    private final OrderReviewRepository reviewRepo;
     private final GroupBuyRepository groupBuyRepo;
     private final GroupBuyService groupBuyService;
+
+    /** Scenic-wide cancellation policy (settable, not per-order): FREE or FEE. */
+    @Value("${app.order.cancel-policy:FREE}")
+    private String cancelPolicy;
+
+    @Value("${app.order.cancel-fee-percent:20}")
+    private int cancelFeePercent;
 
     @Transactional(readOnly = true)
     public List<SessionView> listSessions() {
@@ -92,6 +105,68 @@ public class TouristService {
         return toOrderView(ownedOrder(userId, orderId), null);
     }
 
+    /** Tourist self-cancels an order: releases any 拼团 seat and refunds per the cancel policy. */
+    @Transactional
+    public OrderView cancelOrder(long userId, long orderId) {
+        BookingOrder order = ownedOrder(userId, orderId);
+        String status = order.getStatus();
+        if (!"PENDING_PAYMENT".equals(status) && !"PAID".equals(status)) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单当前状态不可取消");
+        }
+        if (GROUP.equals(order.getType())) {
+            groupBuyService.release(order.getSessionId(), order.getPeopleCount());
+        }
+        if ("PAID".equals(status)) {
+            long refund = "FEE".equalsIgnoreCase(cancelPolicy)
+                    ? order.getAmountFen() * (100L - cancelFeePercent) / 100
+                    : order.getAmountFen();
+            log.info("order {} cancelled: refund {} fen (policy={})", order.getId(), refund, cancelPolicy);
+            order.setStatus("REFUNDED");
+        } else {
+            order.setStatus("CANCELLED");
+        }
+        return toOrderView(orderRepo.save(order), null);
+    }
+
+    /** Tourist reviews a completed order (评分 + 文字; one review per order). */
+    @Transactional
+    public ReviewView reviewOrder(long userId, long orderId, ReviewRequest req) {
+        BookingOrder order = ownedOrder(userId, orderId);
+        if (!"COMPLETED".equals(order.getStatus())) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单完成后才能评价");
+        }
+        if (reviewRepo.findByOrderId(orderId).isPresent()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "该订单已评价");
+        }
+        OrderReview review = new OrderReview();
+        review.setOrderId(orderId);
+        review.setUserId(userId);
+        review.setGuideId(order.getGuideId());
+        review.setRating(req.rating());
+        review.setContent(req.content());
+        review.setCreatedAt(Instant.now());
+        return toReviewView(reviewRepo.save(review));
+    }
+
+    /** The review for an order, or null if not yet reviewed. */
+    @Transactional(readOnly = true)
+    public ReviewView getReview(long userId, long orderId) {
+        ownedOrder(userId, orderId);
+        return reviewRepo.findByOrderId(orderId).map(this::toReviewView).orElse(null);
+    }
+
+    private ReviewView toReviewView(OrderReview r) {
+        return new ReviewView(r.getOrderId(), r.getRating(), r.getContent(),
+                r.getCreatedAt() != null ? r.getCreatedAt().toString() : null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderView> listMyOrders(long userId) {
+        return orderRepo.findByUserIdOrderByIdDesc(userId).stream()
+                .map(o -> toOrderView(o, null))
+                .toList();
+    }
+
     private BookingOrder ownedOrder(long userId, long orderId) {
         BookingOrder order = orderRepo.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "订单不存在"));
@@ -139,7 +214,8 @@ public class TouristService {
                 o.getId(), o.getOrderNo(), o.getType(), o.getPeopleCount(),
                 o.getAmountFen() != null ? o.getAmountFen() : 0,
                 o.getStatus(), o.getVerifyCode(), o.getSessionId(),
-                s != null ? s.getTitle() : null);
+                s != null ? s.getTitle() : null,
+                o.getVisitDate() != null ? o.getVisitDate().toString() : null);
     }
 
     private String generateOrderNo() {

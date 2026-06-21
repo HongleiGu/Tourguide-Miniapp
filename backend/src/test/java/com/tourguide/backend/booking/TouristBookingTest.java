@@ -81,5 +81,10 @@ class TouristBookingTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("PAID"))
                 .andExpect(jsonPath("$.data.verifyCode").isNotEmpty());
+
+        // order center lists the user's orders
+        mvc.perform(get("/api/tourist/orders").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").exists());
     }
 }

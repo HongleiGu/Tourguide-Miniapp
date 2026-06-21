@@ -47,6 +47,10 @@ Page({
     }
   },
 
+  goOrders() {
+    wx.navigateTo({ url: '/pages/orders/orders' })
+  },
+
   doLogout() {
     logout()
     this.setData({ loggedIn: false, userId: 0, type: '', roles: [], tokenPreview: '', phoneBound: false })

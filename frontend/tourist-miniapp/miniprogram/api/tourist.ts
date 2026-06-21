@@ -31,6 +31,7 @@ export interface OrderView {
   verifyCode: string | null
   sessionId: number
   sessionTitle: string
+  visitDate: string | null
 }
 
 export function getSessions(): Promise<SessionView[]> {
@@ -57,6 +58,37 @@ export function mockPay(id: number): Promise<OrderView> {
 
 export function getOrder(id: number): Promise<OrderView> {
   return request<OrderView>({ url: `/api/tourist/orders/${id}` })
+}
+
+export function getMyOrders(): Promise<OrderView[]> {
+  return request<OrderView[]>({ url: '/api/tourist/orders' })
+}
+
+export function cancelOrder(id: number): Promise<OrderView> {
+  return request<OrderView>({ url: `/api/tourist/orders/${id}/cancel`, method: 'POST' })
+}
+
+export interface ReviewView {
+  orderId: number
+  rating: number
+  content: string | null
+  createdAt: string | null
+}
+
+export function submitReview(id: number, data: { rating: number; content?: string }): Promise<ReviewView> {
+  return request<ReviewView>({ url: `/api/tourist/orders/${id}/review`, method: 'POST', data })
+}
+
+export function getReview(id: number): Promise<ReviewView | null> {
+  return request<ReviewView | null>({ url: `/api/tourist/orders/${id}/review` })
+}
+
+export const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: '待支付',
+  PAID: '待服务',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
+  REFUNDED: '已退款',
 }
 
 export const TYPE_LABELS: Record<string, string> = {

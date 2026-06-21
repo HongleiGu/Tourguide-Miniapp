@@ -62,3 +62,29 @@
 .btn {
   margin-top: 20rpx;
 }
+.stars {
+  margin: 12rpx 0;
+}
+.star {
+  font-size: 48rpx;
+  color: #dcdfe6;
+  margin-right: 8rpx;
+}
+.star.on {
+  color: #fadb14;
+}
+.review-content {
+  font-size: 26rpx;
+  color: #1f2329;
+  margin: 8rpx 0;
+}
+.review-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 140rpx;
+  background: #f7f8fa;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  font-size: 26rpx;
+  margin-top: 8rpx;
+}

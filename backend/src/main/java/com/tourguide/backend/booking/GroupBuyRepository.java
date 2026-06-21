@@ -52,4 +52,20 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             where g.id = :id and g.status = 'FORMING' and g.currentSize >= g.maxSize
             """)
     int lockIfFull(@Param("id") Long id);
+
+    /** Release {@code n} seats back (on cancellation). Guarded so it can't go negative. */
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            update GroupBuy g set g.currentSize = g.currentSize - :n
+            where g.id = :id and g.currentSize >= :n and g.status in ('FORMING', 'LOCKED')
+            """)
+    int releaseSeats(@Param("id") Long id, @Param("n") int n);
+
+    /** Reopen a previously-full group once a seat frees up. Idempotent. */
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            update GroupBuy g set g.status = 'FORMING'
+            where g.id = :id and g.status = 'LOCKED' and g.currentSize < g.maxSize
+            """)
+    int reopenIfNotFull(@Param("id") Long id);
 }

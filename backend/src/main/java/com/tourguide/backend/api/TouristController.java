@@ -3,6 +3,8 @@ package com.tourguide.backend.api;
 import com.tourguide.backend.api.dto.AnnouncementView;
 import com.tourguide.backend.api.dto.CreateOrderRequest;
 import com.tourguide.backend.api.dto.OrderView;
+import com.tourguide.backend.api.dto.ReviewRequest;
+import com.tourguide.backend.api.dto.ReviewView;
 import com.tourguide.backend.api.dto.SessionView;
 import com.tourguide.backend.booking.TouristService;
 import com.tourguide.backend.common.ApiResponse;
@@ -47,10 +49,34 @@ public class TouristController {
         return ApiResponse.ok(service.createOrder(requireUser(principal), req));
     }
 
+    @GetMapping("/orders")
+    public ApiResponse<List<OrderView>> myOrders(@AuthenticationPrincipal AuthPrincipal principal) {
+        return ApiResponse.ok(service.listMyOrders(requireUser(principal)));
+    }
+
     @GetMapping("/orders/{id}")
     public ApiResponse<OrderView> getOrder(@AuthenticationPrincipal AuthPrincipal principal,
                                            @PathVariable long id) {
         return ApiResponse.ok(service.getOrder(requireUser(principal), id));
+    }
+
+    @PostMapping("/orders/{id}/cancel")
+    public ApiResponse<OrderView> cancelOrder(@AuthenticationPrincipal AuthPrincipal principal,
+                                              @PathVariable long id) {
+        return ApiResponse.ok(service.cancelOrder(requireUser(principal), id));
+    }
+
+    @PostMapping("/orders/{id}/review")
+    public ApiResponse<ReviewView> review(@AuthenticationPrincipal AuthPrincipal principal,
+                                          @PathVariable long id,
+                                          @Valid @RequestBody ReviewRequest req) {
+        return ApiResponse.ok(service.reviewOrder(requireUser(principal), id, req));
+    }
+
+    @GetMapping("/orders/{id}/review")
+    public ApiResponse<ReviewView> getReview(@AuthenticationPrincipal AuthPrincipal principal,
+                                             @PathVariable long id) {
+        return ApiResponse.ok(service.getReview(requireUser(principal), id));
     }
 
     private long requireUser(AuthPrincipal principal) {
