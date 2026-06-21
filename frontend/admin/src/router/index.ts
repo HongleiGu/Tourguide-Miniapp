@@ -25,6 +25,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Guides.vue'),
         meta: { title: '人员管理' },
       },
+      {
+        path: 'sessions',
+        name: 'sessions',
+        component: () => import('@/views/Sessions.vue'),
+        meta: { title: '场次管理' },
+      },
     ],
   },
 ]
