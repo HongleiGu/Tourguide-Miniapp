@@ -12,6 +12,7 @@
     <view wx:else class="muted">未登录</view>
   </view>
 
+  <button class="btn" bindtap="goOrders">我的订单</button>
   <button class="btn" type="primary" loading="{{busy}}" bindtap="doLogin">登录 / 重新登录</button>
   <button class="btn" bindtap="refresh">刷新 /me</button>
   <button class="btn" open-type="getPhoneNumber" bindgetphonenumber="onGetPhone">手机号快捷登录（绑定）</button>

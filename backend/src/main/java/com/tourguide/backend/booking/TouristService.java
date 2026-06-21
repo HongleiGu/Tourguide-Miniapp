@@ -92,6 +92,13 @@ public class TouristService {
         return toOrderView(ownedOrder(userId, orderId), null);
     }
 
+    @Transactional(readOnly = true)
+    public List<OrderView> listMyOrders(long userId) {
+        return orderRepo.findByUserIdOrderByIdDesc(userId).stream()
+                .map(o -> toOrderView(o, null))
+                .toList();
+    }
+
     private BookingOrder ownedOrder(long userId, long orderId) {
         BookingOrder order = orderRepo.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "订单不存在"));
@@ -139,7 +146,8 @@ public class TouristService {
                 o.getId(), o.getOrderNo(), o.getType(), o.getPeopleCount(),
                 o.getAmountFen() != null ? o.getAmountFen() : 0,
                 o.getStatus(), o.getVerifyCode(), o.getSessionId(),
-                s != null ? s.getTitle() : null);
+                s != null ? s.getTitle() : null,
+                o.getVisitDate() != null ? o.getVisitDate().toString() : null);
     }
 
     private String generateOrderNo() {

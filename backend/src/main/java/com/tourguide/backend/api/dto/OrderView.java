@@ -10,5 +10,6 @@ public record OrderView(
         String status,
         String verifyCode,
         Long sessionId,
-        String sessionTitle) {
+        String sessionTitle,
+        String visitDate) {
 }

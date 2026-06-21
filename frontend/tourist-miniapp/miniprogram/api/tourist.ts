@@ -31,6 +31,7 @@ export interface OrderView {
   verifyCode: string | null
   sessionId: number
   sessionTitle: string
+  visitDate: string | null
 }
 
 export function getSessions(): Promise<SessionView[]> {
@@ -57,6 +58,18 @@ export function mockPay(id: number): Promise<OrderView> {
 
 export function getOrder(id: number): Promise<OrderView> {
   return request<OrderView>({ url: `/api/tourist/orders/${id}` })
+}
+
+export function getMyOrders(): Promise<OrderView[]> {
+  return request<OrderView[]>({ url: '/api/tourist/orders' })
+}
+
+export const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: '待支付',
+  PAID: '待服务',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
+  REFUNDED: '已退款',
 }
 
 export const TYPE_LABELS: Record<string, string> = {

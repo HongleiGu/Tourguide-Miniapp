@@ -47,6 +47,11 @@ public class TouristController {
         return ApiResponse.ok(service.createOrder(requireUser(principal), req));
     }
 
+    @GetMapping("/orders")
+    public ApiResponse<List<OrderView>> myOrders(@AuthenticationPrincipal AuthPrincipal principal) {
+        return ApiResponse.ok(service.listMyOrders(requireUser(principal)));
+    }
+
     @GetMapping("/orders/{id}")
     public ApiResponse<OrderView> getOrder(@AuthenticationPrincipal AuthPrincipal principal,
                                            @PathVariable long id) {
