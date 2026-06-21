@@ -1,6 +1,7 @@
 package com.tourguide.backend.api;
 
 import com.tourguide.backend.api.dto.GuideMe;
+import com.tourguide.backend.api.dto.GuideWorkbench;
 import com.tourguide.backend.common.ApiResponse;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
@@ -27,6 +28,11 @@ public class GuideController {
     @GetMapping("/me")
     public ApiResponse<GuideMe> me(@AuthenticationPrincipal AuthPrincipal principal) {
         return ApiResponse.ok(service.me(requireUser(principal)));
+    }
+
+    @GetMapping("/workbench")
+    public ApiResponse<GuideWorkbench> workbench(@AuthenticationPrincipal AuthPrincipal principal) {
+        return ApiResponse.ok(service.workbench(requireUser(principal)));
     }
 
     private long requireUser(AuthPrincipal principal) {
