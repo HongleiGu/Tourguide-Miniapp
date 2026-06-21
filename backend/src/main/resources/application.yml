@@ -62,6 +62,10 @@ app:
     # Initial super-admin created on startup if absent. Set both in prod; left empty -> skipped.
     username: ${ADMIN_USERNAME:}
     password: ${ADMIN_PASSWORD:}
+  order:
+    # Scenic-wide cancel policy (one rule for all): FREE (full refund) or FEE (charge a %).
+    cancel-policy: ${ORDER_CANCEL_POLICY:FREE}
+    cancel-fee-percent: ${ORDER_CANCEL_FEE_PERCENT:20}
   wechat:
     miniapp:
       app-id: ${WX_APP_ID:}

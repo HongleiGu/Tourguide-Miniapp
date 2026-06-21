@@ -16,5 +16,6 @@
   <button wx:if="{{order.status === 'PENDING_PAYMENT'}}" class="btn" type="primary" loading="{{paying}}" bindtap="pay">
     模拟支付
   </button>
+  <button wx:if="{{order.cancellable}}" class="btn" loading="{{cancelling}}" bindtap="cancel">取消订单</button>
   <button class="btn" bindtap="goHome">返回首页</button>
 </view>

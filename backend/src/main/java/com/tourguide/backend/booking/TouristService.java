@@ -7,6 +7,8 @@ import com.tourguide.backend.api.dto.SessionView;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /** Tourist-facing browse + booking. Real WeChat Pay replaces mock-pay in MIN-27. */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TouristService {
@@ -29,6 +32,13 @@ public class TouristService {
     private final BookingOrderRepository orderRepo;
     private final GroupBuyRepository groupBuyRepo;
     private final GroupBuyService groupBuyService;
+
+    /** Scenic-wide cancellation policy (settable, not per-order): FREE or FEE. */
+    @Value("${app.order.cancel-policy:FREE}")
+    private String cancelPolicy;
+
+    @Value("${app.order.cancel-fee-percent:20}")
+    private int cancelFeePercent;
 
     @Transactional(readOnly = true)
     public List<SessionView> listSessions() {
@@ -90,6 +100,29 @@ public class TouristService {
     @Transactional(readOnly = true)
     public OrderView getOrder(long userId, long orderId) {
         return toOrderView(ownedOrder(userId, orderId), null);
+    }
+
+    /** Tourist self-cancels an order: releases any 拼团 seat and refunds per the cancel policy. */
+    @Transactional
+    public OrderView cancelOrder(long userId, long orderId) {
+        BookingOrder order = ownedOrder(userId, orderId);
+        String status = order.getStatus();
+        if (!"PENDING_PAYMENT".equals(status) && !"PAID".equals(status)) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单当前状态不可取消");
+        }
+        if (GROUP.equals(order.getType())) {
+            groupBuyService.release(order.getSessionId(), order.getPeopleCount());
+        }
+        if ("PAID".equals(status)) {
+            long refund = "FEE".equalsIgnoreCase(cancelPolicy)
+                    ? order.getAmountFen() * (100L - cancelFeePercent) / 100
+                    : order.getAmountFen();
+            log.info("order {} cancelled: refund {} fen (policy={})", order.getId(), refund, cancelPolicy);
+            order.setStatus("REFUNDED");
+        } else {
+            order.setStatus("CANCELLED");
+        }
+        return toOrderView(orderRepo.save(order), null);
     }
 
     @Transactional(readOnly = true)

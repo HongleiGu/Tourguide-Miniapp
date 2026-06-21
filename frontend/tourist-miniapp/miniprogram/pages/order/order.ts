@@ -1,4 +1,4 @@
-import { getOrder, mockPay } from '../../api/tourist'
+import { cancelOrder, getOrder, mockPay } from '../../api/tourist'
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: '待支付',
@@ -19,8 +19,10 @@ Page({
       status: string
       statusLabel: string
       verifyCode: string | null
+      cancellable: boolean
     },
     paying: false,
+    cancelling: false,
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -40,6 +42,7 @@ Page({
           status: o.status,
           statusLabel: STATUS_LABELS[o.status] ?? o.status,
           verifyCode: o.verifyCode,
+          cancellable: o.status === 'PENDING_PAYMENT' || o.status === 'PAID',
         },
       })
     } catch (e) {
@@ -60,6 +63,31 @@ Page({
       wx.showToast({ title: (e as Error).message, icon: 'none' })
     } finally {
       this.setData({ paying: false })
+    }
+  },
+
+  async cancel() {
+    if (this.data.cancelling) {
+      return
+    }
+    try {
+      await wx.showModal({ title: '取消订单', content: '确定取消该订单？' }).then((r) => {
+        if (!r.confirm) {
+          throw new Error('__abort__')
+        }
+      })
+    } catch {
+      return
+    }
+    this.setData({ cancelling: true })
+    try {
+      await cancelOrder(this.data.id)
+      wx.showToast({ title: '已取消' })
+      await this.load()
+    } catch (e) {
+      wx.showToast({ title: (e as Error).message, icon: 'none' })
+    } finally {
+      this.setData({ cancelling: false })
     }
   },
 

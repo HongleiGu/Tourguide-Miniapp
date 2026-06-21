@@ -64,6 +64,10 @@ export function getMyOrders(): Promise<OrderView[]> {
   return request<OrderView[]>({ url: '/api/tourist/orders' })
 }
 
+export function cancelOrder(id: number): Promise<OrderView> {
+  return request<OrderView>({ url: `/api/tourist/orders/${id}/cancel`, method: 'POST' })
+}
+
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: '待支付',
   PAID: '待服务',

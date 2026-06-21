@@ -58,6 +58,12 @@ public class TouristController {
         return ApiResponse.ok(service.getOrder(requireUser(principal), id));
     }
 
+    @PostMapping("/orders/{id}/cancel")
+    public ApiResponse<OrderView> cancelOrder(@AuthenticationPrincipal AuthPrincipal principal,
+                                              @PathVariable long id) {
+        return ApiResponse.ok(service.cancelOrder(requireUser(principal), id));
+    }
+
     private long requireUser(AuthPrincipal principal) {
         if (principal == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);

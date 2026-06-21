@@ -68,6 +68,15 @@ public class GroupBuyService {
         return groupBuyRepo.findById(groupBuyId).orElseThrow();
     }
 
+    /** Release seats back to a session's group (on order cancellation); reopen if it was full. */
+    @Transactional
+    public void release(long sessionId, int n) {
+        groupBuyRepo.findBySessionId(sessionId).ifPresent(g -> {
+            groupBuyRepo.releaseSeats(g.getId(), n);
+            groupBuyRepo.reopenIfNotFull(g.getId());
+        });
+    }
+
     /**
      * Resolve a group at its deadline: 成团 (>= min) -> CONFIRMED; otherwise -> VOIDED and its
      * active orders cancelled. Idempotent (guarded UPDATEs) — safe to call repeatedly / from
