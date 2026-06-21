@@ -1,0 +1,20 @@
+<view class="page" wx:if="{{order}}">
+  <view class="card">
+    <view class="status status-{{order.status}}">{{order.statusLabel}}</view>
+    <view class="title">{{order.sessionTitle}}</view>
+    <view class="line"><text class="k">订单号</text><text class="v">{{order.orderNo}}</text></view>
+    <view class="line"><text class="k">人数</text><text class="v">{{order.peopleCount}}</text></view>
+    <view class="line"><text class="k">金额</text><text class="v price">¥{{order.amountYuan}}</text></view>
+  </view>
+
+  <view wx:if="{{order.status === 'PAID' && order.verifyCode}}" class="card verify">
+    <view class="verify-label">核销码</view>
+    <view class="verify-code">{{order.verifyCode}}</view>
+    <view class="muted">出示给讲解员扫码核销</view>
+  </view>
+
+  <button wx:if="{{order.status === 'PENDING_PAYMENT'}}" class="btn" type="primary" loading="{{paying}}" bindtap="pay">
+    模拟支付
+  </button>
+  <button class="btn" bindtap="goHome">返回首页</button>
+</view>

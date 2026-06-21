@@ -64,7 +64,7 @@ app:
     password: ${ADMIN_PASSWORD:}
   wechat:
     miniapp:
-      app-id: ${WX_APPID:}
+      app-id: ${WX_APP_ID:}
       app-secret: ${WX_APP_SECRET:}
     pay:
       mch-id: ${WXPAY_MCHID:}

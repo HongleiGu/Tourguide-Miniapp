@@ -1,0 +1,64 @@
+import { request } from '../shared/request'
+
+export interface SessionView {
+  id: number
+  title: string
+  type: string
+  date: string
+  startTime: string
+  endTime: string
+  capacity: number
+  remaining: number
+  priceFen: number
+}
+
+export interface AnnouncementView {
+  id: number
+  title: string
+  content: string
+  type: string
+}
+
+export interface OrderView {
+  id: number
+  orderNo: string
+  type: string
+  peopleCount: number
+  amountFen: number
+  status: string
+  verifyCode: string | null
+  sessionId: number
+  sessionTitle: string
+}
+
+export function getSessions(): Promise<SessionView[]> {
+  return request<SessionView[]>({ url: '/api/tourist/sessions', auth: false })
+}
+
+export function getAnnouncements(): Promise<AnnouncementView[]> {
+  return request<AnnouncementView[]>({ url: '/api/tourist/announcements', auth: false })
+}
+
+export function createOrder(data: {
+  sessionId: number
+  peopleCount: number
+  contactName?: string
+  contactPhone?: string
+  visitDate?: string
+}): Promise<OrderView> {
+  return request<OrderView>({ url: '/api/tourist/orders', method: 'POST', data })
+}
+
+export function mockPay(id: number): Promise<OrderView> {
+  return request<OrderView>({ url: `/api/tourist/orders/${id}/mock-pay`, method: 'POST' })
+}
+
+export function getOrder(id: number): Promise<OrderView> {
+  return request<OrderView>({ url: `/api/tourist/orders/${id}` })
+}
+
+export const TYPE_LABELS: Record<string, string> = {
+  PRIVATE: '私人讲解',
+  GROUP: '拼团讲解',
+  EXCLUSIVE: '专属时段',
+}
