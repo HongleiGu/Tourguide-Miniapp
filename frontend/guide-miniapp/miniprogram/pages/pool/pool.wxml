@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="hint">可抢订单（你的接单时段内）</view>
+
+  <view wx:if="{{loading}}" class="muted center">加载中…</view>
+  <view wx:elif="{{!list.length}}" class="muted center">暂无可抢订单</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="card">
+    <view class="row">
+      <text class="title">{{item.sessionTitle}}</text>
+      <text class="muted">{{item.peopleCount}} 人</text>
+    </view>
+    <view class="row">
+      <text class="muted">{{item.date}} {{item.timeRange}}</text>
+      <button
+        class="grab"
+        size="mini"
+        type="primary"
+        loading="{{grabbing === item.id}}"
+        data-id="{{item.id}}"
+        bindtap="grab"
+      >抢单</button>
+    </view>
+  </view>
+</view>

@@ -3,6 +3,7 @@
     "pages/workbench/workbench",
     "pages/orders/orders",
     "pages/order/order",
+    "pages/pool/pool",
     "pages/scan/scan",
     "pages/schedule/schedule",
     "pages/income/income",

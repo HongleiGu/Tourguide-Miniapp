@@ -79,6 +79,14 @@ export function getGuideOrder(id: number): Promise<GuideOrderView> {
   return request<GuideOrderView>({ url: `/api/guide/orders/${id}` })
 }
 
+export function getPool(): Promise<GuideOrderView[]> {
+  return request<GuideOrderView[]>({ url: '/api/guide/pool' })
+}
+
+export function grabOrder(id: number): Promise<GuideOrderView> {
+  return request<GuideOrderView>({ url: `/api/guide/orders/${id}/grab`, method: 'POST' })
+}
+
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: '待支付',
   PAID: '待核销',

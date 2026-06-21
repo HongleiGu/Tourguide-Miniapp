@@ -9,7 +9,25 @@
     "ignoreUploadUnusedFiles": true,
     "es6": false,
     "minified": false,
-    "postcss": false
+    "postcss": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "enhance": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
   "simulatorType": "wechat",
   "srcMiniprogramRoot": "miniprogram/",
@@ -18,5 +36,10 @@
     "tabSize": 2
   },
   "libVersion": "trial",
-  "appid": "wx0000000000000000"
+  "appid": "wxa56ca2b2ce0b579e",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  }
 }

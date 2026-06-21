@@ -1,5 +1,6 @@
 package com.tourguide.backend.guide;
 
+import com.tourguide.backend.api.dto.AdminGuideView;
 import com.tourguide.backend.api.dto.GuideIncome;
 import com.tourguide.backend.api.dto.GuideMe;
 import com.tourguide.backend.api.dto.GuideOrderView;
@@ -42,9 +43,36 @@ public class GuideService {
     @Transactional(readOnly = true)
     public GuideMe me(long userId) {
         GuideProfile p = requireProfile(userId);
-        String name = userRepo.findById(userId).map(AppUser::getNickname).orElse(null);
+        String name = userRepo.findById(p.getUserId()).map(AppUser::getNickname).orElse(null);
         return new GuideMe(p.getId(), name, p.getEmploymentType(),
                 Boolean.TRUE.equals(p.getAcceptingOrders()), p.getStatus(),
+                p.getRating() != null ? p.getRating().doubleValue() : 0,
+                p.getStarLevel() != null ? p.getStarLevel() : 0);
+    }
+
+    /** Admin (MIN-43): set a guide's 派单权重. */
+    @Transactional
+    public AdminGuideView setDispatchWeight(long guideId, int weight) {
+        GuideProfile p = guideRepo.findById(guideId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "讲解员不存在"));
+        p.setDispatchWeight(weight);
+        return adminView(guideRepo.save(p));
+    }
+
+    /** Admin (MIN-43): 暂停/恢复接单权限 (人工判断). SUSPENDED guides are ineligible for dispatch/grab. */
+    @Transactional
+    public AdminGuideView setSuspended(long guideId, boolean suspended) {
+        GuideProfile p = guideRepo.findById(guideId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "讲解员不存在"));
+        p.setStatus(suspended ? "SUSPENDED" : "ENABLED");
+        return adminView(guideRepo.save(p));
+    }
+
+    private AdminGuideView adminView(GuideProfile p) {
+        String name = userRepo.findById(p.getUserId()).map(AppUser::getNickname).orElse(null);
+        return new AdminGuideView(p.getId(), name, p.getEmploymentType(), p.getStatus(),
+                Boolean.TRUE.equals(p.getAcceptingOrders()),
+                p.getDispatchWeight() != null ? p.getDispatchWeight() : 0,
                 p.getRating() != null ? p.getRating().doubleValue() : 0,
                 p.getStarLevel() != null ? p.getStarLevel() : 0);
     }
@@ -160,6 +188,41 @@ public class GuideService {
                     o.getAmountFen() != null ? o.getAmountFen() : 0, o.getStatus());
         }).toList();
         return new GuideIncome(items.size(), total, items);
+    }
+
+    /** 抢单 pool: unassigned active orders this guide is eligible (on-duty) to serve. */
+    @Transactional(readOnly = true)
+    public List<GuideOrderView> pool(long userId) {
+        GuideProfile p = requireProfile(userId);
+        return orderRepo.findByGuideIdIsNullAndStatusInOrderByIdDesc(List.of("PENDING_PAYMENT", "PAID")).stream()
+                .filter(o -> eligibleForOrder(p.getId(), o))
+                .map(this::toGuideOrderView)
+                .toList();
+    }
+
+    /** Claim an unassigned order. Guarded UPDATE => exactly one guide wins under contention. */
+    @Transactional
+    public GuideOrderView grab(long userId, long orderId) {
+        GuideProfile p = requireProfile(userId);
+        BookingOrder o = orderRepo.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "订单不存在"));
+        if (!eligibleForOrder(p.getId(), o)) {
+            throw new BusinessException(ErrorCode.CONFLICT, "当前不在可接单时段或已关闭接单");
+        }
+        if (orderRepo.grab(orderId, p.getId()) == 0) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单已被抢或不可抢");
+        }
+        return toGuideOrderView(orderRepo.findById(orderId).orElseThrow());
+    }
+
+    private boolean eligibleForOrder(long guideId, BookingOrder o) {
+        ScenicSession s = sessionRepo.findById(o.getSessionId()).orElse(null);
+        if (s == null || !"OPEN".equals(s.getStatus())) {
+            return false;
+        }
+        LocalTime time = s.getStartTime() != null ? s.getStartTime() : LocalTime.MIN;
+        LocalDate date = o.getVisitDate() != null ? o.getVisitDate() : s.getSessionDate();
+        return isAcceptingAt(guideId, date, time);
     }
 
     private GuideOrderView toGuideOrderView(BookingOrder o) {

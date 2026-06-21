@@ -21,6 +21,10 @@ Page({
     wx.navigateTo({ url: '/pages/scan/scan' })
   },
 
+  goPool() {
+    wx.navigateTo({ url: '/pages/pool/pool' })
+  },
+
   async load() {
     try {
       const board = await getWorkbench()
