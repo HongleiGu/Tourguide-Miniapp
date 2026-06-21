@@ -3,6 +3,8 @@ package com.tourguide.backend.booking;
 import com.tourguide.backend.api.dto.AnnouncementView;
 import com.tourguide.backend.api.dto.CreateOrderRequest;
 import com.tourguide.backend.api.dto.OrderView;
+import com.tourguide.backend.api.dto.ReviewRequest;
+import com.tourguide.backend.api.dto.ReviewView;
 import com.tourguide.backend.api.dto.SessionView;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
@@ -30,6 +32,7 @@ public class TouristService {
     private final ScenicSessionRepository sessionRepo;
     private final AnnouncementRepository announcementRepo;
     private final BookingOrderRepository orderRepo;
+    private final OrderReviewRepository reviewRepo;
     private final GroupBuyRepository groupBuyRepo;
     private final GroupBuyService groupBuyService;
 
@@ -123,6 +126,38 @@ public class TouristService {
             order.setStatus("CANCELLED");
         }
         return toOrderView(orderRepo.save(order), null);
+    }
+
+    /** Tourist reviews a completed order (评分 + 文字; one review per order). */
+    @Transactional
+    public ReviewView reviewOrder(long userId, long orderId, ReviewRequest req) {
+        BookingOrder order = ownedOrder(userId, orderId);
+        if (!"COMPLETED".equals(order.getStatus())) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单完成后才能评价");
+        }
+        if (reviewRepo.findByOrderId(orderId).isPresent()) {
+            throw new BusinessException(ErrorCode.CONFLICT, "该订单已评价");
+        }
+        OrderReview review = new OrderReview();
+        review.setOrderId(orderId);
+        review.setUserId(userId);
+        review.setGuideId(order.getGuideId());
+        review.setRating(req.rating());
+        review.setContent(req.content());
+        review.setCreatedAt(Instant.now());
+        return toReviewView(reviewRepo.save(review));
+    }
+
+    /** The review for an order, or null if not yet reviewed. */
+    @Transactional(readOnly = true)
+    public ReviewView getReview(long userId, long orderId) {
+        ownedOrder(userId, orderId);
+        return reviewRepo.findByOrderId(orderId).map(this::toReviewView).orElse(null);
+    }
+
+    private ReviewView toReviewView(OrderReview r) {
+        return new ReviewView(r.getOrderId(), r.getRating(), r.getContent(),
+                r.getCreatedAt() != null ? r.getCreatedAt().toString() : null);
     }
 
     @Transactional(readOnly = true)

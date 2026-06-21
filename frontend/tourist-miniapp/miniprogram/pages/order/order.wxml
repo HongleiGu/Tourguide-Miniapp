@@ -13,6 +13,32 @@
     <view class="muted">出示给讲解员扫码核销</view>
   </view>
 
+  <view wx:if="{{order.status === 'COMPLETED'}}" class="card review">
+    <view class="verify-label">评价</view>
+
+    <block wx:if="{{review}}">
+      <view class="stars">
+        <text wx:for="{{stars}}" wx:key="*this" class="star {{item <= review.rating ? 'on' : ''}}">★</text>
+      </view>
+      <view wx:if="{{review.content}}" class="review-content">{{review.content}}</view>
+      <view class="muted">{{review.createdAt}}</view>
+    </block>
+
+    <block wx:else>
+      <view class="stars">
+        <text
+          wx:for="{{stars}}"
+          wx:key="*this"
+          class="star {{item <= ratingInput ? 'on' : ''}}"
+          data-n="{{item}}"
+          bindtap="setRating"
+        >★</text>
+      </view>
+      <textarea class="review-input" placeholder="说说这次讲解体验…" value="{{contentInput}}" bindinput="onReviewContent" />
+      <button class="btn" type="primary" loading="{{submittingReview}}" bindtap="submitReviewTap">提交评价</button>
+    </block>
+  </view>
+
   <button wx:if="{{order.status === 'PENDING_PAYMENT'}}" class="btn" type="primary" loading="{{paying}}" bindtap="pay">
     模拟支付
   </button>
