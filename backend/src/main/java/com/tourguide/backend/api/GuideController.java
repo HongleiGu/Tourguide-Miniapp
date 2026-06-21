@@ -60,6 +60,17 @@ public class GuideController {
         return ApiResponse.ok(service.getOrder(requireUser(principal), id));
     }
 
+    @GetMapping("/pool")
+    public ApiResponse<List<GuideOrderView>> pool(@AuthenticationPrincipal AuthPrincipal principal) {
+        return ApiResponse.ok(service.pool(requireUser(principal)));
+    }
+
+    @PostMapping("/orders/{id}/grab")
+    public ApiResponse<GuideOrderView> grab(@AuthenticationPrincipal AuthPrincipal principal,
+                                            @PathVariable long id) {
+        return ApiResponse.ok(service.grab(requireUser(principal), id));
+    }
+
     @PostMapping("/accepting")
     public ApiResponse<GuideMe> setAccepting(@AuthenticationPrincipal AuthPrincipal principal,
                                              @Valid @RequestBody AcceptingRequest req) {

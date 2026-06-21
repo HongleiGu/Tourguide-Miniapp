@@ -19,7 +19,14 @@ public interface BookingOrderRepository extends JpaRepository<BookingOrder, Long
 
     List<BookingOrder> findByGuideIdOrderByIdDesc(Long guideId);
 
+    List<BookingOrder> findByGuideIdIsNullAndStatusInOrderByIdDesc(List<String> statuses);
+
     int countByGuideIdAndVisitDateAndStatus(Long guideId, LocalDate visitDate, String status);
+
+    /** 抢单: claim an unassigned order atomically. Returns 1 if won, 0 if already taken. */
+    @Modifying(clearAutomatically = true)
+    @Query("update BookingOrder o set o.guideId = :guideId where o.id = :id and o.guideId is null")
+    int grab(@Param("id") Long id, @Param("guideId") Long guideId);
 
     /** Cancel a session's active orders (used when a group-buy is voided). Returns rows updated. */
     @Modifying(clearAutomatically = true)

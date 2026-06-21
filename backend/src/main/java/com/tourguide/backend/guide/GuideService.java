@@ -162,6 +162,41 @@ public class GuideService {
         return new GuideIncome(items.size(), total, items);
     }
 
+    /** 抢单 pool: unassigned active orders this guide is eligible (on-duty) to serve. */
+    @Transactional(readOnly = true)
+    public List<GuideOrderView> pool(long userId) {
+        GuideProfile p = requireProfile(userId);
+        return orderRepo.findByGuideIdIsNullAndStatusInOrderByIdDesc(List.of("PENDING_PAYMENT", "PAID")).stream()
+                .filter(o -> eligibleForOrder(p.getId(), o))
+                .map(this::toGuideOrderView)
+                .toList();
+    }
+
+    /** Claim an unassigned order. Guarded UPDATE => exactly one guide wins under contention. */
+    @Transactional
+    public GuideOrderView grab(long userId, long orderId) {
+        GuideProfile p = requireProfile(userId);
+        BookingOrder o = orderRepo.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "订单不存在"));
+        if (!eligibleForOrder(p.getId(), o)) {
+            throw new BusinessException(ErrorCode.CONFLICT, "当前不在可接单时段或已关闭接单");
+        }
+        if (orderRepo.grab(orderId, p.getId()) == 0) {
+            throw new BusinessException(ErrorCode.CONFLICT, "订单已被抢或不可抢");
+        }
+        return toGuideOrderView(orderRepo.findById(orderId).orElseThrow());
+    }
+
+    private boolean eligibleForOrder(long guideId, BookingOrder o) {
+        ScenicSession s = sessionRepo.findById(o.getSessionId()).orElse(null);
+        if (s == null || !"OPEN".equals(s.getStatus())) {
+            return false;
+        }
+        LocalTime time = s.getStartTime() != null ? s.getStartTime() : LocalTime.MIN;
+        LocalDate date = o.getVisitDate() != null ? o.getVisitDate() : s.getSessionDate();
+        return isAcceptingAt(guideId, date, time);
+    }
+
     private GuideOrderView toGuideOrderView(BookingOrder o) {
         ScenicSession s = sessionRepo.findById(o.getSessionId()).orElse(null);
         return new GuideOrderView(
