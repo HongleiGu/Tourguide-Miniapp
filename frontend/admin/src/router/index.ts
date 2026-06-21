@@ -49,6 +49,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Stats.vue'),
         meta: { title: '基础统计' },
       },
+      {
+        path: 'admins',
+        name: 'admins',
+        component: () => import('@/views/Admins.vue'),
+        meta: { title: '管理员' },
+      },
     ],
   },
 ]
