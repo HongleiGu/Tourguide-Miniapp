@@ -3,6 +3,7 @@
     "pages/workbench/workbench",
     "pages/orders/orders",
     "pages/order/order",
+    "pages/scan/scan",
     "pages/mine/mine"
   ],
   "window": {

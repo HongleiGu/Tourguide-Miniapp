@@ -1,0 +1,52 @@
+.page {
+  padding: 24rpx;
+}
+.btn {
+  margin-top: 16rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-top: 24rpx;
+}
+.card-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+  margin-bottom: 12rpx;
+}
+.input {
+  background: #f7f8fa;
+  border-radius: 12rpx;
+  padding: 18rpx;
+  font-size: 28rpx;
+}
+.ok {
+  border: 1rpx solid #b7eb8f;
+}
+.ok-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #389e0d;
+  margin-bottom: 12rpx;
+}
+.line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+}
+.k {
+  color: #909399;
+  font-size: 26rpx;
+}
+.v {
+  color: #1f2329;
+  font-size: 26rpx;
+}
+.error {
+  margin-top: 24rpx;
+  color: #cf1322;
+  font-size: 26rpx;
+  text-align: center;
+}

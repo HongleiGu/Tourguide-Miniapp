@@ -17,6 +17,10 @@ Page({
     this.load()
   },
 
+  goScan() {
+    wx.navigateTo({ url: '/pages/scan/scan' })
+  },
+
   async load() {
     try {
       const board = await getWorkbench()

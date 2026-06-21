@@ -6,6 +6,7 @@ import com.tourguide.backend.api.dto.OrderView;
 import com.tourguide.backend.api.dto.ReviewRequest;
 import com.tourguide.backend.api.dto.ReviewView;
 import com.tourguide.backend.api.dto.SessionView;
+import com.tourguide.backend.api.dto.VerifyQr;
 import com.tourguide.backend.booking.TouristService;
 import com.tourguide.backend.common.ApiResponse;
 import com.tourguide.backend.common.BusinessException;
@@ -58,6 +59,12 @@ public class TouristController {
     public ApiResponse<OrderView> getOrder(@AuthenticationPrincipal AuthPrincipal principal,
                                            @PathVariable long id) {
         return ApiResponse.ok(service.getOrder(requireUser(principal), id));
+    }
+
+    @GetMapping("/orders/{id}/verify-qr")
+    public ApiResponse<VerifyQr> verifyQr(@AuthenticationPrincipal AuthPrincipal principal,
+                                          @PathVariable long id) {
+        return ApiResponse.ok(service.verifyQr(requireUser(principal), id));
     }
 
     @PostMapping("/orders/{id}/cancel")

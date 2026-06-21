@@ -64,6 +64,15 @@ export function getMyOrders(): Promise<OrderView[]> {
   return request<OrderView[]>({ url: '/api/tourist/orders' })
 }
 
+export interface VerifyQr {
+  code: string
+  dataUrl: string
+}
+
+export function getVerifyQr(id: number): Promise<VerifyQr> {
+  return request<VerifyQr>({ url: `/api/tourist/orders/${id}/verify-qr` })
+}
+
 export function cancelOrder(id: number): Promise<OrderView> {
   return request<OrderView>({ url: `/api/tourist/orders/${id}/cancel`, method: 'POST' })
 }

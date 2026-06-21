@@ -47,6 +47,9 @@
   color: #909399;
   margin-top: 8rpx;
 }
+.scan-btn {
+  margin-bottom: 20rpx;
+}
 .card {
   background: #fff;
   border-radius: 16rpx;

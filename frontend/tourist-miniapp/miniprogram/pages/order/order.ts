@@ -1,4 +1,4 @@
-import { cancelOrder, getOrder, getReview, mockPay, submitReview } from '../../api/tourist'
+import { cancelOrder, getOrder, getReview, getVerifyQr, mockPay, submitReview } from '../../api/tourist'
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: '待支付',
@@ -23,6 +23,7 @@ Page({
     },
     paying: false,
     cancelling: false,
+    qrDataUrl: '',
     review: null as null | { rating: number; content: string | null; createdAt: string | null },
     ratingInput: 5,
     contentInput: '',
@@ -50,6 +51,10 @@ Page({
           cancellable: o.status === 'PENDING_PAYMENT' || o.status === 'PAID',
         },
       })
+      if (o.status === 'PAID' && o.verifyCode) {
+        const qr = await getVerifyQr(this.data.id)
+        this.setData({ qrDataUrl: qr.dataUrl })
+      }
       if (o.status === 'COMPLETED') {
         const review = await getReview(this.data.id)
         this.setData({ review })

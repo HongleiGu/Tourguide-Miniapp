@@ -33,6 +33,8 @@
       </view>
     </view>
 
+    <button class="scan-btn" type="primary" bindtap="goScan">扫码核销</button>
+
     <view class="card">
       <view class="card-title">当日排班</view>
       <view wx:if="{{!schedule.length}}" class="muted">今日无排班</view>

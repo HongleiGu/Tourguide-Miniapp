@@ -72,6 +72,19 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   REFUNDED: '已退款',
 }
 
+export interface VerifyResult {
+  orderId: number
+  orderNo: string
+  sessionTitle: string | null
+  peopleCount: number
+  status: string
+  verifiedAt: string
+}
+
+export function verifyCode(code: string): Promise<VerifyResult> {
+  return request<VerifyResult>({ url: '/api/verify', method: 'POST', data: { code } })
+}
+
 export const EMPLOYMENT_LABELS: Record<string, string> = {
   SELF: '自营',
   OUTSOURCED: '外包',
