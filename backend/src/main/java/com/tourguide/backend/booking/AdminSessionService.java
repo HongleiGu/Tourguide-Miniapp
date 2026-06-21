@@ -4,12 +4,15 @@ import com.tourguide.backend.api.dto.AdminSessionRequest;
 import com.tourguide.backend.api.dto.AdminSessionView;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
+import com.tourguide.backend.pricing.PricingRule;
+import com.tourguide.backend.pricing.PricingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /** Admin 场次管理 (MIN-48): create / list / update / 锁场·停场, with group-buy setup for GROUP. */
@@ -23,6 +26,7 @@ public class AdminSessionService {
     private final ScenicSessionRepository sessionRepo;
     private final GroupBuyRepository groupBuyRepo;
     private final GroupBuyService groupBuyService;
+    private final PricingService pricingService;
 
     @Transactional(readOnly = true)
     public List<AdminSessionView> list(LocalDate date) {
@@ -34,6 +38,7 @@ public class AdminSessionService {
 
     @Transactional
     public AdminSessionView create(AdminSessionRequest r) {
+        Optional<PricingRule> rule = pricingService.ruleFor(r.type(), r.date());
         ScenicSession s = new ScenicSession();
         s.setTitle(r.title());
         s.setType(r.type());
@@ -41,12 +46,15 @@ public class AdminSessionService {
         s.setStartTime(r.startTime());
         s.setEndTime(r.endTime());
         s.setGuideId(r.guideId());
-        s.setPriceFen(r.priceFen());
+        // price defaults from the 工作日/节假日 pricing rule when not given
+        s.setPriceFen(r.priceFen() != null ? r.priceFen()
+                : rule.map(PricingRule::getPriceFen).orElse(0L));
         s.setStatus("OPEN");
-        s.setCapacity(capacityFor(r));
+        s.setCapacity(capacityFor(r, rule));
         ScenicSession saved = sessionRepo.save(s);
         if (GROUP.equals(r.type())) {
-            int min = r.groupMinSize() != null ? r.groupMinSize() : 2;
+            int min = r.groupMinSize() != null ? r.groupMinSize()
+                    : rule.map(PricingRule::getGroupMin).orElse(2);
             groupBuyService.openGroup(saved.getId(), min, saved.getCapacity());
         }
         return view(saved);
@@ -78,9 +86,13 @@ public class AdminSessionService {
         return view(sessionRepo.save(s));
     }
 
-    private int capacityFor(AdminSessionRequest r) {
+    private int capacityFor(AdminSessionRequest r, Optional<PricingRule> rule) {
         if (GROUP.equals(r.type())) {
-            return r.groupMaxSize() != null ? r.groupMaxSize() : (r.capacity() != null ? r.capacity() : 10);
+            if (r.groupMaxSize() != null) {
+                return r.groupMaxSize();
+            }
+            Integer ruleMax = rule.map(PricingRule::getGroupMax).orElse(null);
+            return ruleMax != null ? ruleMax : (r.capacity() != null ? r.capacity() : 10);
         }
         return r.capacity() != null ? r.capacity() : 1;
     }

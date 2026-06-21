@@ -14,7 +14,7 @@ public record AdminSessionRequest(
         LocalTime startTime,
         LocalTime endTime,
         Integer capacity,
-        @NotNull Long priceFen,
+        Long priceFen,
         Long guideId,
         Integer groupMinSize,
         Integer groupMaxSize) {
