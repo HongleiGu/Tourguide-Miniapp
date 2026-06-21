@@ -4,6 +4,7 @@
     "pages/orders/orders",
     "pages/order/order",
     "pages/scan/scan",
+    "pages/schedule/schedule",
     "pages/mine/mine"
   ],
   "window": {

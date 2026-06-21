@@ -64,13 +64,62 @@ public class GuideService {
         boolean accepting = Boolean.TRUE.equals(p.getAcceptingOrders());
         int remaining = (accepting && onDuty) ? remainingCapacityToday(gid, today) : 0;
 
-        List<ScheduleSegment> segments = schedule.stream()
-                .map(s -> new ScheduleSegment(s.getId(), s.getWorkDate().toString(), s.getType(),
-                        time(s.getStartTime()), time(s.getEndTime())))
-                .toList();
+        List<ScheduleSegment> segments = schedule.stream().map(this::toSegment).toList();
 
         return new GuideWorkbench(today.toString(), accepting, onDuty,
                 pending, toVerify, completed, remaining, segments);
+    }
+
+    /** 开启/关闭接单. */
+    @Transactional
+    public GuideMe setAccepting(long userId, boolean accepting) {
+        GuideProfile p = requireProfile(userId);
+        p.setAcceptingOrders(accepting);
+        guideRepo.save(p);
+        return me(userId);
+    }
+
+    /** 排班 between two dates (inclusive). */
+    @Transactional(readOnly = true)
+    public List<ScheduleSegment> schedule(long userId, LocalDate from, LocalDate to) {
+        GuideProfile p = requireProfile(userId);
+        return scheduleRepo.findByGuideIdAndWorkDateBetweenOrderByWorkDateAscStartTimeAsc(p.getId(), from, to)
+                .stream().map(this::toSegment).toList();
+    }
+
+    /**
+     * Whether a guide may take an order at a given time: enabled + accepting + within a WORK
+     * window and not in a REST window. Reused by MIN-7 dispatch (排班时段外自动限制接单).
+     */
+    @Transactional(readOnly = true)
+    public boolean isAcceptingAt(long guideId, LocalDate date, LocalTime time) {
+        GuideProfile p = guideRepo.findById(guideId).orElse(null);
+        if (p == null || !Boolean.TRUE.equals(p.getAcceptingOrders()) || !"ENABLED".equals(p.getStatus())) {
+            return false;
+        }
+        List<GuideSchedule> day = scheduleRepo.findByGuideIdAndWorkDateOrderByStartTimeAsc(guideId, date);
+        boolean inRest = day.stream().anyMatch(s -> "REST".equals(s.getType()) && covers(s, time));
+        if (inRest) {
+            return false;
+        }
+        return day.stream().anyMatch(s -> "WORK".equals(s.getType()) && covers(s, time));
+    }
+
+    private boolean covers(GuideSchedule s, LocalTime t) {
+        LocalTime start = s.getStartTime();
+        LocalTime end = s.getEndTime();
+        if (start == null && end == null) {
+            return true; // all-day segment
+        }
+        if (start != null && t.isBefore(start)) {
+            return false;
+        }
+        return end == null || !t.isAfter(end);
+    }
+
+    private ScheduleSegment toSegment(GuideSchedule s) {
+        return new ScheduleSegment(s.getId(), s.getWorkDate().toString(), s.getType(),
+                time(s.getStartTime()), time(s.getEndTime()));
     }
 
     /** Orders assigned to the logged-in guide (newest first), optionally filtered by status. */

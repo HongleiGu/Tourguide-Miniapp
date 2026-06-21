@@ -37,6 +37,21 @@ export function getWorkbench(): Promise<GuideWorkbench> {
   return request<GuideWorkbench>({ url: '/api/guide/workbench' })
 }
 
+export function setAccepting(accepting: boolean): Promise<GuideMe> {
+  return request<GuideMe>({ url: '/api/guide/accepting', method: 'POST', data: { accepting } })
+}
+
+export function getSchedule(from?: string, to?: string): Promise<ScheduleSegment[]> {
+  const data: Record<string, unknown> = {}
+  if (from) {
+    data.from = from
+  }
+  if (to) {
+    data.to = to
+  }
+  return request<ScheduleSegment[]>({ url: '/api/guide/schedule', data })
+}
+
 export const SCHEDULE_TYPE_LABELS: Record<string, string> = {
   WORK: '上班',
   REST: '休息',

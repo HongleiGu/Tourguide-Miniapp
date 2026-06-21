@@ -1,0 +1,46 @@
+.page {
+  padding: 24rpx;
+}
+.hint {
+  font-size: 26rpx;
+  color: #909399;
+  margin-bottom: 16rpx;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+}
+.date {
+  font-size: 26rpx;
+  color: #1f2329;
+}
+.type {
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+}
+.type-WORK {
+  color: #fff;
+  background: #389e0d;
+}
+.type-REST {
+  color: #fff;
+  background: #909399;
+}
+.range {
+  font-size: 26rpx;
+  color: #606266;
+}
+.muted {
+  font-size: 26rpx;
+  color: #909399;
+}
+.center {
+  text-align: center;
+  padding: 60rpx 0;
+}

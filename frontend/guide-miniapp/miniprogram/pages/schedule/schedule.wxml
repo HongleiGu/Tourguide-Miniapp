@@ -1,0 +1,12 @@
+<view class="page">
+  <view class="hint">未来一周排班</view>
+
+  <view wx:if="{{loading}}" class="muted center">加载中…</view>
+  <view wx:elif="{{!list.length}}" class="muted center">暂无排班</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="row">
+    <text class="date">{{item.date}}</text>
+    <text class="type type-{{item.type}}">{{item.typeLabel}}</text>
+    <text class="range">{{item.range}}</text>
+  </view>
+</view>
