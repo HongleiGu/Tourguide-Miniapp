@@ -1,6 +1,7 @@
 package com.tourguide.backend.api;
 
 import com.tourguide.backend.api.dto.AcceptingRequest;
+import com.tourguide.backend.api.dto.GuideIncome;
 import com.tourguide.backend.api.dto.GuideMe;
 import com.tourguide.backend.api.dto.GuideOrderView;
 import com.tourguide.backend.api.dto.GuideWorkbench;
@@ -63,6 +64,11 @@ public class GuideController {
     public ApiResponse<GuideMe> setAccepting(@AuthenticationPrincipal AuthPrincipal principal,
                                              @Valid @RequestBody AcceptingRequest req) {
         return ApiResponse.ok(service.setAccepting(requireUser(principal), req.accepting()));
+    }
+
+    @GetMapping("/income")
+    public ApiResponse<GuideIncome> income(@AuthenticationPrincipal AuthPrincipal principal) {
+        return ApiResponse.ok(service.income(requireUser(principal)));
     }
 
     @GetMapping("/schedule")

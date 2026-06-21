@@ -100,6 +100,25 @@ export function verifyCode(code: string): Promise<VerifyResult> {
   return request<VerifyResult>({ url: '/api/verify', method: 'POST', data: { code } })
 }
 
+export interface GuideIncomeItem {
+  orderId: number
+  orderNo: string
+  sessionTitle: string | null
+  date: string
+  amountFen: number
+  status: string
+}
+
+export interface GuideIncome {
+  orderCount: number
+  totalFen: number
+  items: GuideIncomeItem[]
+}
+
+export function getIncome(): Promise<GuideIncome> {
+  return request<GuideIncome>({ url: '/api/guide/income' })
+}
+
 export const EMPLOYMENT_LABELS: Record<string, string> = {
   SELF: '自营',
   OUTSOURCED: '外包',

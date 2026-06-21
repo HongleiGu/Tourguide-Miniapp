@@ -15,5 +15,6 @@
   <view wx:else class="muted center">未登录或非讲解员账号</view>
 
   <button wx:if="{{me}}" class="btn" bindtap="goSchedule">我的排班</button>
+  <button wx:if="{{me}}" class="btn" bindtap="goIncome">我的收入</button>
   <button class="btn" bindtap="doLogout">退出登录</button>
 </view>

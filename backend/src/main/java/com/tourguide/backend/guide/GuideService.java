@@ -1,5 +1,6 @@
 package com.tourguide.backend.guide;
 
+import com.tourguide.backend.api.dto.GuideIncome;
 import com.tourguide.backend.api.dto.GuideMe;
 import com.tourguide.backend.api.dto.GuideOrderView;
 import com.tourguide.backend.api.dto.GuideWorkbench;
@@ -141,6 +142,24 @@ public class GuideService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "无权访问该订单");
         }
         return toGuideOrderView(o);
+    }
+
+    /** Gross income (订单数 + 金额总额 + 明细) for PAID/COMPLETED orders. 线上不做分佣. */
+    @Transactional(readOnly = true)
+    public GuideIncome income(long userId) {
+        GuideProfile p = requireProfile(userId);
+        List<BookingOrder> orders = orderRepo.findByGuideIdOrderByIdDesc(p.getId()).stream()
+                .filter(o -> "PAID".equals(o.getStatus()) || "COMPLETED".equals(o.getStatus()))
+                .toList();
+        long total = orders.stream().mapToLong(o -> o.getAmountFen() != null ? o.getAmountFen() : 0).sum();
+        List<GuideIncome.Item> items = orders.stream().map(o -> {
+            ScenicSession s = sessionRepo.findById(o.getSessionId()).orElse(null);
+            return new GuideIncome.Item(o.getId(), o.getOrderNo(),
+                    s != null ? s.getTitle() : null,
+                    s != null ? String.valueOf(s.getSessionDate()) : String.valueOf(o.getVisitDate()),
+                    o.getAmountFen() != null ? o.getAmountFen() : 0, o.getStatus());
+        }).toList();
+        return new GuideIncome(items.size(), total, items);
     }
 
     private GuideOrderView toGuideOrderView(BookingOrder o) {

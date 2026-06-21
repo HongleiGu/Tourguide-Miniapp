@@ -48,6 +48,10 @@ Page({
     wx.navigateTo({ url: '/pages/schedule/schedule' })
   },
 
+  goIncome() {
+    wx.navigateTo({ url: '/pages/income/income' })
+  },
+
   doLogout() {
     logout()
     this.setData({ me: null })

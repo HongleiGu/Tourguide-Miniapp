@@ -5,6 +5,7 @@
     "pages/order/order",
     "pages/scan/scan",
     "pages/schedule/schedule",
+    "pages/income/income",
     "pages/mine/mine"
   ],
   "window": {
