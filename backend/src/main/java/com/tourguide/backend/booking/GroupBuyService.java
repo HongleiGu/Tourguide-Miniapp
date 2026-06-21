@@ -35,18 +35,24 @@ public class GroupBuyService {
     /** The group-buy for a GROUP session, created (with a deadline + scheduled timeout) on first access. */
     @Transactional
     public GroupBuy getOrCreate(ScenicSession session) {
-        return groupBuyRepo.findBySessionId(session.getId()).orElseGet(() -> {
-            GroupBuy g = new GroupBuy();
-            g.setSessionId(session.getId());
-            g.setMinSize(DEFAULT_MIN_SIZE);
-            g.setMaxSize(session.getCapacity() != null ? session.getCapacity() : 10);
-            g.setCurrentSize(0);
-            g.setStatus("FORMING");
-            g.setDeadline(Instant.now().plus(groupTimeout));
-            GroupBuy saved = groupBuyRepo.save(g);
-            delayedQueue.schedule(RedisKeys.GROUP_BUY_TIMEOUT_QUEUE, String.valueOf(saved.getId()), groupTimeout);
-            return saved;
-        });
+        return groupBuyRepo.findBySessionId(session.getId())
+                .orElseGet(() -> openGroup(session.getId(), DEFAULT_MIN_SIZE,
+                        session.getCapacity() != null ? session.getCapacity() : 10));
+    }
+
+    /** Create a FORMING group-buy with a deadline and a scheduled timeout on the delayed queue. */
+    @Transactional
+    public GroupBuy openGroup(long sessionId, int minSize, int maxSize) {
+        GroupBuy g = new GroupBuy();
+        g.setSessionId(sessionId);
+        g.setMinSize(minSize);
+        g.setMaxSize(maxSize);
+        g.setCurrentSize(0);
+        g.setStatus("FORMING");
+        g.setDeadline(Instant.now().plus(groupTimeout));
+        GroupBuy saved = groupBuyRepo.save(g);
+        delayedQueue.schedule(RedisKeys.GROUP_BUY_TIMEOUT_QUEUE, String.valueOf(saved.getId()), groupTimeout);
+        return saved;
     }
 
     /**
