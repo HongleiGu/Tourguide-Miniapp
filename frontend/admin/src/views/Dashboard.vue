@@ -1,61 +1,85 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { getPing } from '@/api/ping'
+import { getStats, type Stats } from '@/api/stats'
 import type { PingResponse } from '@/api/types'
 
+const router = useRouter()
+
 const ping = ref<PingResponse | null>(null)
-const error = ref('')
+const pingError = ref('')
+const stats = ref<Stats | null>(null)
 const loading = ref(true)
 
 onMounted(async () => {
+  getPing()
+    .then((p) => (ping.value = p))
+    .catch((e) => (pingError.value = (e as Error).message))
   try {
-    ping.value = await getPing()
-  } catch (e) {
-    error.value = (e as Error).message
+    stats.value = await getStats()
   } finally {
     loading.value = false
   }
 })
+
+const cards = computed(() => {
+  const s = stats.value
+  if (!s) return []
+  return [
+    { label: '订单总量', value: s.totalOrders },
+    { label: '待核销', value: s.paidOrders },
+    { label: '已完成', value: s.completedOrders },
+    { label: '游客量', value: s.visitors },
+    { label: '营收总额(元)', value: (s.revenueFen / 100).toFixed(2) },
+    { label: '成团率', value: `${(s.groupFormationRate * 100).toFixed(1)}%` },
+    { label: '核销率', value: `${(s.verificationRate * 100).toFixed(1)}%` },
+  ]
+})
+
+const quickLinks = [
+  { label: '人员管理', path: '/guides' },
+  { label: '场次管理', path: '/sessions' },
+  { label: '订单管理', path: '/orders' },
+  { label: '基础统计', path: '/stats' },
+]
 </script>
 
 <template>
   <div class="dashboard">
-    <el-row :gutter="16">
-      <el-col :span="8">
-        <el-card>
-          <template #header>后端连通性</template>
-          <div v-loading="loading" class="conn">
-            <template v-if="ping">
-              <el-tag type="success">在线</el-tag>
-              <p>服务：{{ ping.service }}</p>
-              <p>Profiles：{{ ping.profiles?.join(', ') }}</p>
-              <p class="time">{{ ping.time }}</p>
-            </template>
-            <el-tag v-else-if="error" type="danger">离线：{{ error }}</el-tag>
-          </div>
+    <el-row :gutter="16" v-loading="loading">
+      <el-col v-for="c in cards" :key="c.label" :span="6" class="card-col">
+        <el-card shadow="hover">
+          <div class="card-label">{{ c.label }}</div>
+          <div class="card-value">{{ c.value }}</div>
         </el-card>
       </el-col>
-      <el-col :span="8">
-        <el-card>
-          <template #header>今日订单</template>
-          <div class="stat">—</div>
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card>
-          <template #header>讲解员在岗</template>
-          <div class="stat">—</div>
-        </el-card>
+      <el-col v-if="!loading && !cards.length" :span="24">
+        <el-card><el-empty description="暂无统计数据" /></el-card>
       </el-col>
     </el-row>
 
-    <el-card class="welcome">
-      <h3>欢迎使用景区讲解服务管理后台</h3>
-      <p>
-        这是 MIN-15 的脚手架页面。业务模块（人员管理、订单与场次、拼团规则、考核、数据大屏）
-        将随后续 epic 落地。统计卡片现为占位数据。
-      </p>
-    </el-card>
+    <el-row :gutter="16">
+      <el-col :span="16">
+        <el-card>
+          <template #header>快捷入口</template>
+          <el-button v-for="l in quickLinks" :key="l.path" class="quick" @click="router.push(l.path)">
+            {{ l.label }}
+          </el-button>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card>
+          <template #header>后端连通性</template>
+          <template v-if="ping">
+            <el-tag type="success">在线</el-tag>
+            <p>服务：{{ ping.service }}</p>
+            <p class="muted">{{ ping.time }}</p>
+          </template>
+          <el-tag v-else-if="pingError" type="danger">离线：{{ pingError }}</el-tag>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -65,19 +89,25 @@ onMounted(async () => {
   flex-direction: column;
   gap: 16px;
 }
-.conn p {
-  margin: 6px 0 0;
+.card-col {
+  margin-bottom: 16px;
+}
+.card-label {
+  color: #909399;
   font-size: 13px;
 }
-.time {
-  color: #909399;
-}
-.stat {
-  font-size: 28px;
+.card-value {
+  font-size: 26px;
   font-weight: 600;
   color: #1f3a5f;
+  margin-top: 8px;
 }
-.welcome h3 {
-  margin-top: 0;
+.quick {
+  margin: 0 12px 12px 0;
+}
+.muted {
+  color: #909399;
+  font-size: 13px;
+  margin: 6px 0 0;
 }
 </style>
