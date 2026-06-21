@@ -28,6 +28,20 @@ public interface BookingOrderRepository extends JpaRepository<BookingOrder, Long
     @Query("update BookingOrder o set o.guideId = :guideId where o.id = :id and o.guideId is null")
     int grab(@Param("id") Long id, @Param("guideId") Long guideId);
 
+    /** Admin order search with optional filters (null = ignore). */
+    @Query("""
+            select o from BookingOrder o
+            where (:status is null or o.status = :status)
+              and (:type is null or o.type = :type)
+              and (:guideId is null or o.guideId = :guideId)
+              and (:from is null or o.visitDate >= :from)
+              and (:to is null or o.visitDate <= :to)
+            order by o.id desc
+            """)
+    List<BookingOrder> search(@Param("status") String status, @Param("type") String type,
+                              @Param("guideId") Long guideId,
+                              @Param("from") LocalDate from, @Param("to") LocalDate to);
+
     /** Cancel a session's active orders (used when a group-buy is voided). Returns rows updated. */
     @Modifying(clearAutomatically = true)
     @Query("""
