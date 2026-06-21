@@ -12,6 +12,8 @@ public interface BookingOrderRepository extends JpaRepository<BookingOrder, Long
 
     Optional<BookingOrder> findByOrderNo(String orderNo);
 
+    Optional<BookingOrder> findByVerifyCode(String verifyCode);
+
     List<BookingOrder> findByUserIdOrderByIdDesc(Long userId);
 
     /** Cancel a session's active orders (used when a group-buy is voided). Returns rows updated. */
