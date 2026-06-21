@@ -22,10 +22,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class TouristService {
 
     private static final String OPEN = "OPEN";
+    private static final String GROUP = "GROUP";
 
     private final ScenicSessionRepository sessionRepo;
     private final AnnouncementRepository announcementRepo;
     private final BookingOrderRepository orderRepo;
+    private final GroupBuyRepository groupBuyRepo;
+    private final GroupBuyService groupBuyService;
 
     @Transactional(readOnly = true)
     public List<SessionView> listSessions() {
@@ -48,8 +51,11 @@ public class TouristService {
         if (!OPEN.equals(session.getStatus())) {
             throw new BusinessException(ErrorCode.CONFLICT, "该场次不可预约");
         }
-        int remaining = remaining(session);
-        if (req.peopleCount() > remaining) {
+        if (GROUP.equals(session.getType())) {
+            // 拼团: atomically claim seats (no oversell, locks at full). Throws if full/closed.
+            GroupBuy group = groupBuyService.getOrCreate(session);
+            groupBuyService.claim(group.getId(), req.peopleCount());
+        } else if (req.peopleCount() > remaining(session)) {
             throw new BusinessException(ErrorCode.CONFLICT, "剩余名额不足");
         }
 
@@ -96,6 +102,12 @@ public class TouristService {
     }
 
     private int remaining(ScenicSession session) {
+        if (GROUP.equals(session.getType())) {
+            // GROUP capacity is owned by the group-buy row (authoritative seat count).
+            return groupBuyRepo.findBySessionId(session.getId())
+                    .map(g -> Math.max(0, g.getMaxSize() - g.getCurrentSize()))
+                    .orElseGet(() -> session.getCapacity() != null ? session.getCapacity() : 0);
+        }
         int cap = session.getCapacity() != null ? session.getCapacity() : 0;
         return Math.max(0, cap - orderRepo.sumBookedPeople(session.getId()));
     }

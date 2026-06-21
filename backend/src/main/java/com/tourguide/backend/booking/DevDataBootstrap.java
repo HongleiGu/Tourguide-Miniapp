@@ -21,17 +21,24 @@ public class DevDataBootstrap implements ApplicationRunner {
 
     private final ScenicSessionRepository sessionRepo;
     private final AnnouncementRepository announcementRepo;
+    private final GroupBuyRepository groupBuyRepo;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         if (sessionRepo.count() == 0) {
             LocalDate today = LocalDate.now();
-            sessionRepo.saveAll(List.of(
+            List<ScenicSession> sessions = sessionRepo.saveAll(List.of(
                     session("故宫深度讲解·私人专场", "PRIVATE", today, LocalTime.of(9, 0), LocalTime.of(11, 0), 1, 30000L),
                     session("故宫拼团讲解（上午）", "GROUP", today, LocalTime.of(9, 30), LocalTime.of(11, 30), 10, 8000L),
                     session("珍宝馆专属时段讲解", "EXCLUSIVE", today.plusDays(1), LocalTime.of(14, 0), LocalTime.of(15, 30), 6, 12000L),
                     session("角楼日落讲解·拼团", "GROUP", today.plusDays(1), LocalTime.of(16, 30), LocalTime.of(18, 0), 12, 6000L)));
+            // Create a group-buy row for each GROUP session (min 2, max = capacity).
+            for (ScenicSession s : sessions) {
+                if ("GROUP".equals(s.getType())) {
+                    groupBuyRepo.save(groupBuy(s.getId(), 2, s.getCapacity()));
+                }
+            }
             log.info("Seeded sample scenic sessions");
         }
         if (announcementRepo.count() == 0) {
@@ -54,6 +61,16 @@ public class DevDataBootstrap implements ApplicationRunner {
         s.setPriceFen(priceFen);
         s.setStatus("OPEN");
         return s;
+    }
+
+    private GroupBuy groupBuy(Long sessionId, int minSize, int maxSize) {
+        GroupBuy g = new GroupBuy();
+        g.setSessionId(sessionId);
+        g.setMinSize(minSize);
+        g.setMaxSize(maxSize);
+        g.setCurrentSize(0);
+        g.setStatus("FORMING");
+        return g;
     }
 
     private Announcement announcement(String title, String content, String type) {
