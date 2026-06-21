@@ -11,18 +11,28 @@ Page({
     contactName: '',
     contactPhone: '',
     totalYuan: '0',
+    remaining: 0,
+    isGroup: false,
+    groupStatus: '',
+    canBook: true,
     submitting: false,
   },
 
   onLoad(query: Record<string, string | undefined>) {
     const priceFen = Number(query.priceFen ?? 0)
     const type = query.type ?? ''
+    const remaining = Number(query.remaining ?? 0)
+    const groupStatus = query.groupStatus ?? ''
     this.setData({
       sessionId: Number(query.sessionId ?? 0),
       title: decodeURIComponent(query.title ?? ''),
       type,
       typeLabel: TYPE_LABELS[type] ?? type,
       priceFen,
+      remaining,
+      isGroup: type === 'GROUP',
+      groupStatus,
+      canBook: remaining > 0,
       totalYuan: (priceFen / 100).toFixed(0),
     })
   },
@@ -41,7 +51,7 @@ Page({
   },
 
   async submit() {
-    if (this.data.submitting) {
+    if (this.data.submitting || !this.data.canBook) {
       return
     }
     this.setData({ submitting: true })

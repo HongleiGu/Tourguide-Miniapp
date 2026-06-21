@@ -10,6 +10,8 @@ export interface SessionView {
   capacity: number
   remaining: number
   priceFen: number
+  joined: number | null
+  groupStatus: string | null
 }
 
 export interface AnnouncementView {
@@ -61,4 +63,11 @@ export const TYPE_LABELS: Record<string, string> = {
   PRIVATE: '私人讲解',
   GROUP: '拼团讲解',
   EXCLUSIVE: '专属时段',
+}
+
+export const GROUP_STATUS_LABELS: Record<string, string> = {
+  FORMING: '拼团中',
+  LOCKED: '已满',
+  CONFIRMED: '已成团',
+  VOIDED: '已结束',
 }

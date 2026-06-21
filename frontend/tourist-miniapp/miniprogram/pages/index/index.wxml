@@ -20,16 +20,20 @@
     data-title="{{item.title}}"
     data-price="{{item.priceFen}}"
     data-type="{{item.type}}"
+    data-remaining="{{item.remaining}}"
+    data-status="{{item.groupLabel}}"
     bindtap="goBooking"
   >
     <view class="card-title">{{item.title}}</view>
     <view class="card-row">
       <text class="tag">{{item.typeLabel}}</text>
+      <text wx:if="{{item.isGroup}}" class="tag group">{{item.groupLabel}}</text>
       <text class="muted">{{item.date}} {{item.startTime}}-{{item.endTime}}</text>
     </view>
     <view class="card-row">
       <text class="price">¥{{item.priceYuan}}</text>
-      <text class="muted">剩余 {{item.remaining}}/{{item.capacity}}</text>
+      <text wx:if="{{item.isGroup}}" class="muted">已拼 {{item.joined}}/{{item.capacity}} · 剩 {{item.remaining}}</text>
+      <text wx:else class="muted">剩余 {{item.remaining}}/{{item.capacity}}</text>
     </view>
   </view>
 </view>

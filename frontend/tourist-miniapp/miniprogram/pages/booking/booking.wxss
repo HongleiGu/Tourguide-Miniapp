@@ -20,6 +20,11 @@
   border-radius: 6rpx;
   padding: 4rpx 12rpx;
 }
+.group-info {
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  color: #ad6800;
+}
 .form .row {
   display: flex;
   align-items: center;

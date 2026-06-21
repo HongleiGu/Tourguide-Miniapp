@@ -113,6 +113,15 @@ public class TouristService {
     }
 
     private SessionView toSessionView(ScenicSession s) {
+        Integer joined = null;
+        String groupStatus = null;
+        if (GROUP.equals(s.getType())) {
+            GroupBuy g = groupBuyRepo.findBySessionId(s.getId()).orElse(null);
+            if (g != null) {
+                joined = g.getCurrentSize();
+                groupStatus = g.getStatus();
+            }
+        }
         return new SessionView(
                 s.getId(), s.getTitle(), s.getType(),
                 String.valueOf(s.getSessionDate()),
@@ -120,7 +129,8 @@ public class TouristService {
                 s.getEndTime() != null ? s.getEndTime().toString() : null,
                 s.getCapacity() != null ? s.getCapacity() : 0,
                 remaining(s),
-                s.getPriceFen() != null ? s.getPriceFen() : 0);
+                s.getPriceFen() != null ? s.getPriceFen() : 0,
+                joined, groupStatus);
     }
 
     private OrderView toOrderView(BookingOrder o, ScenicSession known) {

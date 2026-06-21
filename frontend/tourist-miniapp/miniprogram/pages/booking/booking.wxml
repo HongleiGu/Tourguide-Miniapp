@@ -2,6 +2,8 @@
   <view class="card">
     <view class="title">{{title}}</view>
     <text class="tag">{{typeLabel}}</text>
+    <view wx:if="{{isGroup}}" class="group-info">拼团 {{groupStatus}} · 剩余 {{remaining}} 个名额</view>
+    <view wx:elif="{{remaining >= 0}}" class="group-info">剩余 {{remaining}} 个名额</view>
   </view>
 
   <view class="card form">
@@ -21,6 +23,8 @@
 
   <view class="footer">
     <view class="total">合计 <text class="price">¥{{totalYuan}}</text></view>
-    <button class="submit" type="primary" loading="{{submitting}}" bindtap="submit">立即预约</button>
+    <button class="submit" type="primary" loading="{{submitting}}" disabled="{{!canBook}}" bindtap="submit">
+      {{canBook ? '立即预约' : '已满'}}
+    </button>
   </view>
 </view>
