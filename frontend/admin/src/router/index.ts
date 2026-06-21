@@ -19,6 +19,42 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Dashboard.vue'),
         meta: { title: '工作台' },
       },
+      {
+        path: 'guides',
+        name: 'guides',
+        component: () => import('@/views/Guides.vue'),
+        meta: { title: '人员管理' },
+      },
+      {
+        path: 'sessions',
+        name: 'sessions',
+        component: () => import('@/views/Sessions.vue'),
+        meta: { title: '场次管理' },
+      },
+      {
+        path: 'pricing',
+        name: 'pricing',
+        component: () => import('@/views/Pricing.vue'),
+        meta: { title: '价格与规则' },
+      },
+      {
+        path: 'orders',
+        name: 'orders',
+        component: () => import('@/views/Orders.vue'),
+        meta: { title: '订单管理' },
+      },
+      {
+        path: 'stats',
+        name: 'stats',
+        component: () => import('@/views/Stats.vue'),
+        meta: { title: '基础统计' },
+      },
+      {
+        path: 'admins',
+        name: 'admins',
+        component: () => import('@/views/Admins.vue'),
+        meta: { title: '管理员' },
+      },
     ],
   },
 ]
