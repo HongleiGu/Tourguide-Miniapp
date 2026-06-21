@@ -17,6 +17,8 @@ public interface BookingOrderRepository extends JpaRepository<BookingOrder, Long
 
     List<BookingOrder> findByUserIdOrderByIdDesc(Long userId);
 
+    List<BookingOrder> findByGuideIdOrderByIdDesc(Long guideId);
+
     int countByGuideIdAndVisitDateAndStatus(Long guideId, LocalDate visitDate, String status);
 
     /** Cancel a session's active orders (used when a group-buy is voided). Returns rows updated. */

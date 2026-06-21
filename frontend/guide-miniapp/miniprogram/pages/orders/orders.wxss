@@ -1,13 +1,62 @@
 .page {
-  padding: 40rpx 24rpx;
+  padding: 16rpx 24rpx;
 }
-.title {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #1f2329;
+.tabs {
+  display: flex;
+  gap: 8rpx;
+  padding: 12rpx 0 20rpx;
+}
+.tab {
+  font-size: 26rpx;
+  color: #606266;
+  padding: 8rpx 24rpx;
+  border-radius: 999rpx;
+  background: #f0f2f5;
+}
+.tab.active {
+  color: #fff;
+  background: #1f3a5f;
+}
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
   margin-bottom: 16rpx;
 }
-.muted {
-  font-size: 26rpx;
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+.title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+.status {
+  font-size: 24rpx;
   color: #909399;
+}
+.status-PAID {
+  color: #d48806;
+}
+.status-COMPLETED {
+  color: #389e0d;
+}
+.status-CANCELLED,
+.status-REFUNDED {
+  color: #cf1322;
+}
+.muted {
+  font-size: 24rpx;
+  color: #909399;
+}
+.no {
+  font-size: 22rpx;
+  color: #c0c4cc;
+}
+.center {
+  text-align: center;
+  padding: 60rpx 0;
 }

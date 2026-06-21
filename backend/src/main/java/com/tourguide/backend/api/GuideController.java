@@ -1,6 +1,7 @@
 package com.tourguide.backend.api;
 
 import com.tourguide.backend.api.dto.GuideMe;
+import com.tourguide.backend.api.dto.GuideOrderView;
 import com.tourguide.backend.api.dto.GuideWorkbench;
 import com.tourguide.backend.common.ApiResponse;
 import com.tourguide.backend.common.BusinessException;
@@ -12,8 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /** 讲解员工作台 (MIN-6). GUIDE-only. */
 @Tag(name = "Guide")
@@ -33,6 +38,18 @@ public class GuideController {
     @GetMapping("/workbench")
     public ApiResponse<GuideWorkbench> workbench(@AuthenticationPrincipal AuthPrincipal principal) {
         return ApiResponse.ok(service.workbench(requireUser(principal)));
+    }
+
+    @GetMapping("/orders")
+    public ApiResponse<List<GuideOrderView>> orders(@AuthenticationPrincipal AuthPrincipal principal,
+                                                    @RequestParam(required = false) String status) {
+        return ApiResponse.ok(service.listOrders(requireUser(principal), status));
+    }
+
+    @GetMapping("/orders/{id}")
+    public ApiResponse<GuideOrderView> order(@AuthenticationPrincipal AuthPrincipal principal,
+                                             @PathVariable long id) {
+        return ApiResponse.ok(service.getOrder(requireUser(principal), id));
     }
 
     private long requireUser(AuthPrincipal principal) {

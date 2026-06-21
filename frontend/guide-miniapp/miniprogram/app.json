@@ -2,6 +2,7 @@
   "pages": [
     "pages/workbench/workbench",
     "pages/orders/orders",
+    "pages/order/order",
     "pages/mine/mine"
   ],
   "window": {

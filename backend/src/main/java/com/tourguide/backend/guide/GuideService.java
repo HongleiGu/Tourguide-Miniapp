@@ -1,9 +1,12 @@
 package com.tourguide.backend.guide;
 
 import com.tourguide.backend.api.dto.GuideMe;
+import com.tourguide.backend.api.dto.GuideOrderView;
 import com.tourguide.backend.api.dto.GuideWorkbench;
 import com.tourguide.backend.api.dto.ScheduleSegment;
+import com.tourguide.backend.booking.BookingOrder;
 import com.tourguide.backend.booking.BookingOrderRepository;
+import com.tourguide.backend.booking.ScenicSession;
 import com.tourguide.backend.booking.ScenicSessionRepository;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 /** Guide-facing workbench services (MIN-6). */
 @Service
@@ -67,6 +71,40 @@ public class GuideService {
 
         return new GuideWorkbench(today.toString(), accepting, onDuty,
                 pending, toVerify, completed, remaining, segments);
+    }
+
+    /** Orders assigned to the logged-in guide (newest first), optionally filtered by status. */
+    @Transactional(readOnly = true)
+    public List<GuideOrderView> listOrders(long userId, String status) {
+        GuideProfile p = requireProfile(userId);
+        return orderRepo.findByGuideIdOrderByIdDesc(p.getId()).stream()
+                .filter(o -> status == null || status.isBlank() || status.equals(o.getStatus()))
+                .map(this::toGuideOrderView)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public GuideOrderView getOrder(long userId, long orderId) {
+        GuideProfile p = requireProfile(userId);
+        BookingOrder o = orderRepo.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "订单不存在"));
+        if (!Objects.equals(o.getGuideId(), p.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无权访问该订单");
+        }
+        return toGuideOrderView(o);
+    }
+
+    private GuideOrderView toGuideOrderView(BookingOrder o) {
+        ScenicSession s = sessionRepo.findById(o.getSessionId()).orElse(null);
+        return new GuideOrderView(
+                o.getId(), o.getOrderNo(),
+                s != null ? s.getTitle() : null,
+                o.getType(),
+                s != null ? String.valueOf(s.getSessionDate()) : String.valueOf(o.getVisitDate()),
+                s != null && s.getStartTime() != null ? s.getStartTime().toString() : null,
+                s != null && s.getEndTime() != null ? s.getEndTime().toString() : null,
+                o.getPeopleCount() != null ? o.getPeopleCount() : 0,
+                o.getStatus(), o.getContactName(), o.getContactPhone());
     }
 
     private int remainingCapacityToday(long guideId, LocalDate today) {
