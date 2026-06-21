@@ -1,5 +1,6 @@
 package com.tourguide.backend.guide;
 
+import com.tourguide.backend.api.dto.AdminGuideView;
 import com.tourguide.backend.api.dto.GuideIncome;
 import com.tourguide.backend.api.dto.GuideMe;
 import com.tourguide.backend.api.dto.GuideOrderView;
@@ -42,9 +43,36 @@ public class GuideService {
     @Transactional(readOnly = true)
     public GuideMe me(long userId) {
         GuideProfile p = requireProfile(userId);
-        String name = userRepo.findById(userId).map(AppUser::getNickname).orElse(null);
+        String name = userRepo.findById(p.getUserId()).map(AppUser::getNickname).orElse(null);
         return new GuideMe(p.getId(), name, p.getEmploymentType(),
                 Boolean.TRUE.equals(p.getAcceptingOrders()), p.getStatus(),
+                p.getRating() != null ? p.getRating().doubleValue() : 0,
+                p.getStarLevel() != null ? p.getStarLevel() : 0);
+    }
+
+    /** Admin (MIN-43): set a guide's 派单权重. */
+    @Transactional
+    public AdminGuideView setDispatchWeight(long guideId, int weight) {
+        GuideProfile p = guideRepo.findById(guideId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "讲解员不存在"));
+        p.setDispatchWeight(weight);
+        return adminView(guideRepo.save(p));
+    }
+
+    /** Admin (MIN-43): 暂停/恢复接单权限 (人工判断). SUSPENDED guides are ineligible for dispatch/grab. */
+    @Transactional
+    public AdminGuideView setSuspended(long guideId, boolean suspended) {
+        GuideProfile p = guideRepo.findById(guideId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "讲解员不存在"));
+        p.setStatus(suspended ? "SUSPENDED" : "ENABLED");
+        return adminView(guideRepo.save(p));
+    }
+
+    private AdminGuideView adminView(GuideProfile p) {
+        String name = userRepo.findById(p.getUserId()).map(AppUser::getNickname).orElse(null);
+        return new AdminGuideView(p.getId(), name, p.getEmploymentType(), p.getStatus(),
+                Boolean.TRUE.equals(p.getAcceptingOrders()),
+                p.getDispatchWeight() != null ? p.getDispatchWeight() : 0,
                 p.getRating() != null ? p.getRating().doubleValue() : 0,
                 p.getStarLevel() != null ? p.getStarLevel() : 0);
     }
