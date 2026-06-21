@@ -10,6 +10,7 @@ import com.tourguide.backend.api.dto.VerifyQr;
 import com.tourguide.backend.common.BusinessException;
 import com.tourguide.backend.common.ErrorCode;
 import com.tourguide.backend.common.QrCodes;
+import com.tourguide.backend.dispatch.DispatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,6 +39,7 @@ public class TouristService {
     private final OrderReviewRepository reviewRepo;
     private final GroupBuyRepository groupBuyRepo;
     private final GroupBuyService groupBuyService;
+    private final DispatchService dispatchService;
 
     /** Scenic-wide cancellation policy (settable, not per-order): FREE or FEE. */
     @Value("${app.order.cancel-policy:FREE}")
@@ -86,7 +89,15 @@ public class TouristService {
         order.setVisitDate(req.visitDate() != null ? req.visitDate() : session.getSessionDate());
         order.setAmountFen(session.getPriceFen() * req.peopleCount());
         order.setStatus("PENDING_PAYMENT");
-        return toOrderView(orderRepo.save(order), session);
+        BookingOrder saved = orderRepo.save(order);
+
+        // 自动派单: if the session has no fixed guide, weighted auto-dispatch picks one
+        // (none eligible -> stays unassigned for the manual 抢单 pool, MIN-42).
+        if (saved.getGuideId() == null) {
+            LocalTime time = session.getStartTime() != null ? session.getStartTime() : LocalTime.MIN;
+            dispatchService.assign(saved, order.getVisitDate(), time);
+        }
+        return toOrderView(saved, session);
     }
 
     /** Dev-only stand-in for WeChat Pay: mark the order paid and issue a 核销码. */
